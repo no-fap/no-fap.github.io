@@ -1,1 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Privacy Policy - NoFap</title>
+  <style>
+    :root {
+      --bg-dark: #020617;
+      --accent: #38bdf8;
+      --glass-bg: rgba(255, 255, 255, 0.03);
+      --glass-border: rgba(255, 255, 255, 0.08);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+    }
 
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 10%;
+      background: rgba(2, 6, 23, 0.6);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--glass-border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: var(--text-main);
+      font-weight: 700;
+      font-size: 1.5rem;
+      letter-spacing: -0.5px;
+    }
+
+    .brand img {
+      width: 45px;
+      height: 45px;
+      border-radius: 12px;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 30px;
+    }
+
+    .nav-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.95rem;
+      transition: color 0.3s;
+    }
+
+    .nav-links a:hover {
+      color: var(--accent);
+    }
+
+    .content-wrapper {
+      max-width: 800px;
+      margin: 60px auto;
+      padding: 40px;
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-radius: 20px;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+      color: #ffffff;
+    }
+
+    .last-updated {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      margin-bottom: 40px;
+      display: block;
+    }
+
+    h2 {
+      font-size: 1.4rem;
+      color: var(--accent);
+      margin-top: 30px;
+      margin-bottom: 15px;
+    }
+
+    p {
+      color: var(--text-muted);
+      line-height: 1.7;
+      margin-bottom: 15px;
+    }
+
+    ul {
+      color: var(--text-muted);
+      margin-left: 20px;
+      margin-bottom: 20px;
+      line-height: 1.7;
+    }
+
+    footer {
+      text-align: center;
+      padding: 40px 20px;
+      border-top: 1px solid var(--glass-border);
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      margin-top: auto;
+    }
+
+    @media (max-width: 768px) {
+      .content-wrapper {
+        margin: 20px;
+        padding: 25px;
+      }
+      .nav-links { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <a href="../index.html" class="brand">
+      <!-- Referencing logo from parent directory -->
+      <img src="../870.png" alt="NoFap Logo">
+      NoFap
+    </a>
+    <nav class="nav-links">
+      <a href="../index.html">Home</a>
+      <a href="index.html">Privacy Policy</a>
+      <a href="mailto:yashdaive@hotmail.com">Contact Support</a>
+    </nav>
+  </header>
+
+  <main class="content-wrapper">
+    <h1>Privacy Policy</h1>
+    <span class="last-updated">Last Updated: September 12, 2026</span>
+
+    <p>Welcome to NoFap. We are committed to protecting your privacy and ensuring that your personal information is handled in a safe and responsible manner. This Privacy Policy outlines how we collect, use, and protect your data.</p>
+
+    <h2>1. Information We Collect</h2>
+    <p>When you use our application, we may collect the following types of information:</p>
+    <ul>
+      <li><strong>Authentication Data:</strong> When you log in using Google Sign-In, we collect your basic profile information, including your name, email address (e.g., yashdaive@hotmail.com), and profile picture.</li>
+      <li><strong>App Usage Data:</strong> We collect self-reported daily logs, streak statistics, and in-app milestone achievements.</li>
+    </ul>
+
+    <h2>2. How We Use Your Information</h2>
+    <p>We use the information we collect strictly to provide and improve the service. Specifically, we use your data to:</p>
+    <ul>
+      <li>Authenticate your identity securely via Firebase Authentication.</li>
+      <li>Track your personal progress, streaks, and milestones within the application.</li>
+      <li>Enable group accountability features, allowing group members to view shared progress and real-time updates.</li>
+    </ul>
+
+    <h2>3. Data Sharing and Disclosure</h2>
+    <p><strong>We do not sell, rent, or trade your personal data to any third parties.</strong> Your data is solely used for the functionality of the app.</p>
+    <p>Information regarding your progress and relapses is shared <em>only</em> with the explicit members of your designated accountability groups.</p>
+
+    <h2>4. Data Security</h2>
+    <p>Your data is stored securely using Google Cloud Firestore and Firebase Auth infrastructures, which employ industry-standard encryption and security protocols to protect against unauthorized access.</p>
+
+    <h2>5. Contact Us</h2>
+    <p>If you have any questions or concerns about this Privacy Policy or how your data is handled, please contact the developer at:</p>
+    <p>Email: <a href="mailto:yashdaive@hotmail.com" style="color: var(--accent); text-decoration: none;">yashdaive@hotmail.com</a></p>
+  </main>
+
+  <footer>
+    <p>&copy; 2026 NoFap Tracker. All rights reserved.</p>
+  </footer>
+</body>
+</html>
