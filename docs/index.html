@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NoFap - Track Progress, Build Discipline</title>
+<link rel="icon" type="image/png" href="resources/images/logo.png">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared.css">
+<style>
+nav{position:fixed;top:20px;left:20px;right:20px;padding:14px 5%;display:flex;justify-content:space-between;align-items:center;z-index:100;border-radius:20px}
+.nav-left,.nav-right{display:flex;align-items:center;gap:15px}.nav-logo{height:40px;width:40px;object-fit:contain}.nav-title{font-size:1.5rem;font-weight:800;letter-spacing:-.5px}
+.container{max-width:1200px;margin:0 auto;padding:120px 20px 40px;display:flex;flex-direction:column;gap:80px}
+.hero{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;min-height:70vh}
+.hero-text h1{font-size:clamp(2.2rem,5vw,4rem);line-height:1.1;margin-bottom:24px;background:linear-gradient(to right,var(--text-main),var(--accent-cyan));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.hero-text p{font-size:1.2rem;color:var(--text-muted);margin-bottom:40px;line-height:1.6}
+.hover-card{transition:transform .4s cubic-bezier(.175,.885,.32,1.275),box-shadow .4s,border-color .4s}
+.hover-card:hover{transform:translateY(-8px);box-shadow:0 20px 40px rgba(0,240,255,.15);border-color:rgba(0,240,255,.4)}
+.ranker-widget{padding:40px;display:flex;flex-direction:column;gap:20px;position:relative;overflow:hidden}
+.ranker-badge{position:absolute;top:0;right:0;background:linear-gradient(135deg,#FFD700,#FFA500);color:#000;font-size:.8rem;font-weight:800;padding:8px 24px;border-bottom-left-radius:24px;letter-spacing:1px;text-transform:uppercase}
+.ranker-header{color:var(--text-muted);font-size:.9rem;font-weight:600;text-transform:uppercase;letter-spacing:1px}
+.rank-row{display:flex;align-items:center;gap:20px;width:100%}
+.avatar{width:60px;height:60px;flex:none;border-radius:50%;background:linear-gradient(135deg,var(--accent-cyan),var(--accent-blue));display:flex;align-items:center;justify-content:center;font-size:1.5rem;font-weight:800;color:#fff}
+.rank-row h3{font-size:1.4rem;font-weight:800;margin-bottom:5px;word-break:break-word}.rank-row p{font-size:1.1rem;color:var(--accent-cyan);font-weight:600}
+.section-title{text-align:center;font-size:clamp(1.8rem,4vw,2.5rem);margin-bottom:40px}
+.features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:24px}
+.feature-card{padding:30px}.feature-icon{font-size:2rem;margin-bottom:20px;display:inline-block}
+.feature-card h3{margin-bottom:12px;font-size:1.3rem}.feature-card p{color:var(--text-muted);line-height:1.6;font-size:.95rem}
+footer{text-align:center;padding:40px 20px;border-top:1px solid var(--glass-border);color:var(--text-muted);font-size:.9rem}footer a{color:var(--accent-cyan);text-decoration:none}
+@media(max-width:900px){.hero{grid-template-columns:1fr;text-align:center;gap:40px;min-height:auto}.ranker-widget{padding:30px 24px;text-align:left}}
+@media(max-width:480px){nav{top:10px;left:10px;right:10px;padding:10px 16px}.nav-title{display:none}.container{padding-top:100px;gap:60px}.btn-primary{padding:10px 20px}}
+</style></head><body>
+<div id="global-loader" class="glass-loader"><div class="loader-spinner"></div><h2 class="loader-text">Loading...</h2></div>
+<div class="orb-container"><div class="orb orb-1"></div><div class="orb orb-2"></div><div class="orb orb-3"></div></div>
+<nav class="glass-panel">
+  <div class="nav-left"><img src="resources/images/logo.png" alt="NoFap Logo" class="nav-logo"><span class="nav-title">NoFap</span></div>
+  <div class="nav-right"><button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">🌙</button><button class="btn-primary" id="signin">Sign In</button></div>
+</nav>
+<div class="container">
+  <section class="hero">
+    <div class="hero-text"><h1>Master your mind.<br>Reclaim your life.</h1>
+      <p>A beautiful, brutal accountability tracker built for you and your circle. Track progress, rise through the ranks, and build unbreakable discipline.</p>
+      <button class="btn-primary" style="font-size:1.1rem;padding:16px 36px" id="signin2">Start Tracking Free</button></div>
+    <div class="glass-panel ranker-widget hover-card"><div class="ranker-badge">Top Ranker</div><div class="ranker-header">Current Leaderboard #1</div>
+      <div id="leaderboard-content" style="min-height:80px;display:flex;align-items:center;justify-content:center"><div class="loader-spinner" style="width:30px;height:30px;margin:20px auto"></div></div></div>
+  </section>
+  <section><h2 class="section-title">Built for Real Discipline</h2><div class="features-grid">
+    <div class="glass-panel feature-card hover-card"><span class="feature-icon">⏱️</span><h3>The 24-Hour Cycle</h3><p>Log your status daily. Miss a day and your streak is automatically reset to zero.</p></div>
+    <div class="glass-panel feature-card hover-card"><span class="feature-icon">🛡️</span><h3>Rank Progression</h3><p>Climb from Novice upward. Your streak is your proof of dedication, and a slip sends you back to day one.</p></div>
+    <div class="glass-panel feature-card hover-card"><span class="feature-icon">🤝</span><h3>Group Accountability</h3><p>See the live progress of your friends. Honest tracking is enforced by the people who know you best.</p></div>
+    <div class="glass-panel feature-card hover-card"><span class="feature-icon">🔒</span><h3>Privacy First</h3><p>Secured via Google Authentication. Only your chosen nickname and current streak are ever public.</p></div>
+  </div></section>
+</div>
+<footer><p>Contact: <a href="mailto:yashdaive@hotmail.com">yashdaive@hotmail.com</a> | <a href="privacy-policy/index.html">Privacy Policy</a></p></footer>
+<script type="module">
+import { auth, db, $, hideLoader, initTheme } from "./shared.js";
+import { onAuthStateChanged, signInWithPopup, signInWithRedirect, getRedirectResult, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+import { collection, query, orderBy, limit, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+import { dateStr } from "./shared.js";
+initTheme($('themeToggle'));
+const provider = new GoogleAuthProvider();
+getRedirectResult(auth).catch(console.error);
+onAuthStateChanged(auth, async user => {
+  if (!user) return hideLoader(600);
+  try { const s = await getDoc(doc(db, "users", user.uid)); location.replace(s.exists() && s.data().nickname ? "dashboard.html" : "onboarding.html"); }
+  catch (e) { console.error(e); hideLoader(); }
+});
+async function login() {
+  try { await signInWithPopup(auth, provider); }
+  catch (e) {
+    if (['auth/popup-blocked','auth/operation-not-supported-in-this-environment','auth/cancelled-popup-request'].includes(e.code)) return signInWithRedirect(auth, provider);
+    if (e.code !== 'auth/popup-closed-by-user') alert("Authentication failed. Please try again.");
+  }
+}
+$('signin').onclick = $('signin2').onclick = login;
+(async () => {
+  const box = $('leaderboard-content');
+  try {
+    const snap = await getDocs(query(collection(db, "publicProfiles"), orderBy("currentStreak", "desc"), limit(10)));
+    const t = dateStr(), y = dateStr(new Date(Date.now() - 864e5));
+    const top = snap.docs.map(d => d.data()).find(d => d.currentStreak > 0 && (d.lastLogDate === t || d.lastLogDate === y));
+    if (!top) { box.innerHTML = '<div style="text-align:center"><h3 style="font-size:1.2rem;font-weight:800">The throne is empty.</h3><p style="color:var(--text-muted);font-size:.9rem;margin-top:5px">Sign in to claim the #1 spot.</p></div>'; return; }
+    const name = top.nickname || "Unknown Warrior";
+    box.innerHTML = '<div class="rank-row"><div class="avatar"></div><div><h3></h3><p></p></div></div>';
+    box.querySelector('.avatar').textContent = name.charAt(0).toUpperCase();
+    box.querySelector('h3').textContent = name;
+    box.querySelector('p').textContent = `${top.currentStreak} Days Clean`;
+  } catch (e) { console.error(e); box.innerHTML = '<p style="color:var(--text-muted);font-size:.9rem">Leaderboard unavailable.</p>'; }
+})();
+</script></body></html>

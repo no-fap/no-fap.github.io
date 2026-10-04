@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Setup Profile - NoFap</title>
+<link rel="icon" type="image/png" href="resources/images/logo.png">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared.css">
+<style>
+body{display:flex;align-items:center;justify-content:center;padding:24px;overflow-y:auto}
+.card{padding:40px 32px;width:100%;max-width:420px;margin:auto;text-align:center;transition:transform .4s,box-shadow .4s,border-color .4s}
+.card:hover{transform:translateY(-4px);box-shadow:0 20px 40px rgba(0,240,255,.1);border-color:rgba(0,240,255,.3)}
+.card h2{font-size:1.8rem;margin-bottom:8px;letter-spacing:-.5px}.card>p{color:var(--text-muted);margin-bottom:28px;font-size:.95rem}
+.input-group{text-align:left;margin-bottom:20px}
+.input-group label{display:block;font-size:.85rem;margin-bottom:8px;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+input,select{width:100%;background:rgba(0,0,0,.3);border:1px solid var(--glass-border);color:var(--text-main);padding:14px 16px;border-radius:12px;font-size:1rem;outline:none;transition:all .3s;-webkit-appearance:none;appearance:none}
+[data-theme=light] input,[data-theme=light] select{background:rgba(255,255,255,.7)}
+input:focus,select:focus{border-color:var(--accent-cyan);box-shadow:0 0 15px rgba(0,240,255,.15)}
+select option{background:#0f172a;color:#fff}
+.btn-submit{width:100%;background:linear-gradient(135deg,var(--accent-cyan),var(--accent-blue));color:#fff;border:none;padding:16px;border-radius:12px;font-size:1.05rem;font-weight:800;cursor:pointer;margin-top:10px;transition:all .3s;text-transform:uppercase;letter-spacing:1px}
+.btn-submit:hover{transform:translateY(-2px);box-shadow:0 10px 20px rgba(0,240,255,.25)}.btn-submit:disabled{opacity:.6;cursor:not-allowed;transform:none}
+@media(max-width:480px){.card{padding:32px 20px}.card h2{font-size:1.5rem}}
+</style></head><body>
+<div id="global-loader" class="glass-loader"><div class="loader-spinner"></div><h2 class="loader-text">Loading...</h2></div>
+<div class="orb-container"><div class="orb orb-1"></div><div class="orb orb-2"></div></div>
+<div class="card glass-panel"><h2>Forge Your Identity</h2><p>Set up your profile to enter the dashboard.</p>
+<form id="profileForm">
+ <div class="input-group"><label for="nickname">Nickname (Visible to everyone)</label><input type="text" id="nickname" required placeholder="e.g. ShadowMonk" maxlength="20"></div>
+ <div class="input-group"><label for="dob">Date of Birth</label><input type="date" id="dob" required></div>
+ <div class="input-group"><label for="gender">Gender</label><select id="gender" required><option value="" disabled selected>Select...</option><option value="male">Male</option><option value="female">Female</option><option value="other">Other</option></select></div>
+ <button type="submit" class="btn-submit" id="submitBtn">Enter the Arena</button>
+</form></div>
+<script type="module">
+import { auth, db, $, hideLoader, initTheme } from "./shared.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+import { doc, getDoc, writeBatch } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+initTheme(); $('dob').max = new Date().toISOString().split('T')[0];
+let user = null;
+onAuthStateChanged(auth, async u => {
+  if (!u) return location.replace("index.html");
+  user = u;
+  try { const s = await getDoc(doc(db, "users", u.uid)); if (s.exists() && s.data().nickname) return location.replace("dashboard.html"); } catch (e) { console.error(e); }
+  hideLoader();
+});
+$('profileForm').addEventListener('submit', async e => {
+  e.preventDefault(); const btn = $('submitBtn'); btn.disabled = true; btn.textContent = "Forging profile...";
+  const nickname = $('nickname').value.trim().slice(0, 20);
+  if (!nickname) { btn.disabled = false; btn.textContent = "Enter the Arena"; return; }
+  try {
+    const b = writeBatch(db);
+    b.set(doc(db, "users", user.uid), { nickname, dob: $('dob').value, gender: $('gender').value, email: user.email, currentStreak: 0, highestStreak: 0, createdAt: new Date().toISOString() });
+    b.set(doc(db, "publicProfiles", user.uid), { nickname, currentStreak: 0, lastLogDate: '' });
+    await b.commit(); location.replace("dashboard.html");
+  } catch (err) { console.error(err); alert("Failed to save profile. Please try again."); btn.disabled = false; btn.textContent = "Enter the Arena"; }
+});
+</script></body></html>

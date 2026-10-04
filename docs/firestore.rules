@@ -1,0 +1,46 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{db}/documents {
+    function me(uid) { return request.auth != null && request.auth.uid == uid; }
+    function p2(n) { return (n < 10 ? '0' : '') + string(n); }
+    function ymd(t) { return string(t.year()) + '-' + p2(t.month()) + '-' + p2(t.day()); }
+    function u(uid) { return getAfter(/databases/$(db)/documents/users/$(uid)).data; }
+
+    match /users/{uid} {
+      allow read: if me(uid);
+      allow create: if me(uid)
+        && request.resource.data.currentStreak == 0 && request.resource.data.highestStreak == 0
+        && request.resource.data.nickname is string
+        && request.resource.data.nickname.size() > 0 && request.resource.data.nickname.size() <= 20;
+      allow update: if me(uid)
+        && request.resource.data.diff(resource.data).affectedKeys()
+             .hasOnly(['currentStreak','highestStreak','lastLogDate','lastLogStatus','lastLogAt'])
+        && request.resource.data.lastLogAt == request.time
+        // One log per calendar day: the date must be near "today" (allows any timezone) and
+        // the matching logs/{date} doc is created in the same batch (create-only, so no repeats).
+        && request.resource.data.lastLogDate in [ymd(request.time - duration.value(1, 'd')), ymd(request.time), ymd(request.time + duration.value(1, 'd'))]
+        && request.resource.data.lastLogDate != resource.data.get('lastLogDate', '')
+        && existsAfter(/databases/$(db)/documents/users/$(uid)/logs/$(request.resource.data.lastLogDate))
+        && request.resource.data.currentStreak in [0, 1, resource.data.currentStreak + 1]
+        && request.resource.data.highestStreak == math.max(request.resource.data.currentStreak, resource.data.highestStreak);
+      match /logs/{d} {
+        allow read: if me(uid);
+        allow create: if me(uid) && d == request.resource.data.date
+          && request.resource.data.keys().hasOnly(['date','masturbated','pornHours'])
+          && request.resource.data.masturbated is bool
+          && request.resource.data.pornHours is number
+          && request.resource.data.pornHours >= 0 && request.resource.data.pornHours <= 5.5;
+      }
+    }
+
+    // Only nickname + streak are public; must mirror the private doc.
+    match /publicProfiles/{uid} {
+      allow read: if true;
+      allow create, update: if me(uid)
+        && request.resource.data.keys().hasOnly(['nickname','currentStreak','lastLogDate'])
+        && request.resource.data.nickname == u(uid).nickname
+        && request.resource.data.currentStreak == u(uid).currentStreak
+        && request.resource.data.lastLogDate == u(uid).get('lastLogDate', '');
+    }
+  }
+}
