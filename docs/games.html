@@ -47,10 +47,10 @@ main{max-width:1300px;margin:0 auto;padding:90px 0 20px;overflow-x:clip}@media(m
 #pov{position:fixed;inset:0;z-index:3000;display:none;background:rgba(5,5,16,0);transition:background .5s}#pov.open{display:block}#pov.on{background:rgba(5,5,16,.72)}
 #pwin{position:fixed;display:flex;flex-direction:column;border-radius:28px;overflow:hidden;background:#000 center/cover;border:1px solid var(--glass-border);transition:left .5s cubic-bezier(.2,.8,.2,1),top .5s cubic-bezier(.2,.8,.2,1),width .5s cubic-bezier(.2,.8,.2,1),height .5s cubic-bezier(.2,.8,.2,1),border-radius .5s}
 #pov.fs #pwin{left:0!important;top:0!important;width:100vw!important;height:100dvh!important;border-radius:0;border:none}
-.pstrip{display:flex;justify-content:flex-end;gap:8px;padding:8px 10px;background:rgba(5,5,16,.45);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-bottom:1px solid var(--glass-border);opacity:0;transition:opacity .3s}#pov.on .pstrip{opacity:1}
-.pbtn{width:40px;height:40px;border-radius:12px;border:1px solid var(--glass-border);background:var(--glass-bg);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center}
-.pbtn svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}.pbtn.x{color:#ef4444;border-color:rgba(239,68,68,.4)}
-#pf{flex:1;width:100%;border:none;background:transparent;opacity:0;transition:opacity .4s}#pwin.ready #pf{opacity:1}
+.pstrip{display:flex;justify-content:flex-end;gap:10px;padding:10px 12px 4px;background:transparent;opacity:0;transition:opacity .3s}#pov.on .pstrip{opacity:1}
+.pbtn{width:42px;height:42px;border-radius:14px;border:1px solid rgba(255,255,255,.22);background:linear-gradient(135deg,rgba(255,255,255,.2),rgba(255,255,255,.04));backdrop-filter:blur(18px) saturate(1.6);-webkit-backdrop-filter:blur(18px) saturate(1.6);box-shadow:inset 0 1px 0 rgba(255,255,255,.4),0 6px 18px rgba(0,0,0,.25);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .2s,background .2s}.pbtn:active{transform:scale(.92)}
+.pbtn svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}.pbtn.x{color:#ff6b6b;border-color:rgba(255,107,107,.45)}
+#pf{flex:1;width:100%;border:none;background:transparent;opacity:0;transition:opacity .4s}#pwin.ready #pf{opacity:1}#pwin.done{background-image:none!important;background-color:var(--bg-color)}
 </style></head><body>
 <div id="global-loader" class="glass-loader"><div class="loader-spinner"></div><h2 class="loader-text">Loading...</h2></div>
 <div class="orb-container"><div class="orb orb-1"></div><div class="orb orb-2"></div></div>
@@ -148,17 +148,17 @@ function layout() {
 }
 function openGame(i) {
   const g = GAMES[i], w = $('pwin'); openIdx = i;
-  w.classList.remove('ready'); w.style.backgroundImage = g.dir ? `url(${coverUrl(g)})` : `linear-gradient(135deg,${g.c[0]},${g.c[1]})`;
+  w.classList.remove('ready', 'done'); w.style.backgroundImage = g.dir ? `url(${coverUrl(g)})` : `linear-gradient(135deg,${g.c[0]},${g.c[1]})`;
   w.style.transition = 'none'; setRect(cards[i].getBoundingClientRect());
   $('pov').classList.add('open'); document.body.classList.add('playing'); void w.offsetWidth; w.style.transition = '';
-  $('pf').onload = () => w.classList.add('ready'); $('pf').src = g.url;
+  $('pf').onload = () => { w.classList.add('ready'); setTimeout(() => w.classList.add('done'), 450); }; $('pf').src = g.url;
   requestAnimationFrame(() => { $('pov').classList.add('on'); layout(); });
   history.pushState({ g: 1 }, '');
 }
 function closeGame() {
   if (openIdx < 0) return; const i = openIdx, w = $('pwin');
   $('pov').classList.remove('on', 'fs'); if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
-  w.classList.remove('ready'); setRect(cards[i].getBoundingClientRect());
+  w.classList.remove('ready', 'done'); setRect(cards[i].getBoundingClientRect());
   setTimeout(() => { $('pov').classList.remove('open'); document.body.classList.remove('playing'); $('pf').src = 'about:blank'; openIdx = -1; loadBest(i); }, 520);
   if (history.state?.g) { ignorePop = true; history.back(); }
 }
