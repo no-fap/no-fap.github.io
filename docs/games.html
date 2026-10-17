@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Games - NoFap</title>
+<link rel="icon" type="image/png" href="resources/images/logo.png">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared.css">
+<style>
+body{padding-bottom:110px}
+.app-nav{position:fixed;z-index:1000;display:flex;align-items:center;justify-content:space-between;background:var(--nav-bg);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid var(--glass-border)}
+.nav-brand{display:none;align-items:center;gap:12px;font-weight:800;font-size:1.2rem}.nav-brand img{width:32px;height:32px;border-radius:8px}
+.nav-links{display:flex;gap:20px;align-items:center;justify-content:space-around;width:100%}
+.nav-item{color:var(--text-muted);text-decoration:none;display:flex;flex-direction:column;align-items:center;gap:5px;font-size:.85rem;font-weight:600;transition:color .3s,transform .2s;background:none;border:none;cursor:pointer}
+.nav-item:hover,.nav-item.active{color:var(--text-main)}.nav-item:hover{transform:translateY(-2px)}
+.nav-item svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.nav-item.active svg{stroke:var(--accent-cyan);filter:drop-shadow(0 0 8px rgba(0,240,255,.4))}
+@media(min-width:769px){.app-nav{top:20px;left:50%;transform:translateX(-50%);width:calc(100% - 40px);max-width:1200px;border-radius:20px;padding:15px 30px}.nav-brand{display:flex}.nav-item{flex-direction:row;gap:10px;font-size:1rem}.nav-links{width:auto}}
+@media(max-width:768px){.app-nav{bottom:max(16px,env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);width:90%;max-width:400px;border-radius:50px;padding:14px 25px;box-shadow:0 20px 40px rgba(0,0,0,.4)}.nav-item span{display:none}}
+body.playing .app-nav{display:none}
+main{max-width:1300px;margin:0 auto;padding:90px 0 20px;overflow-x:clip}@media(max-width:768px){main{padding-top:24px}}
+#locked{display:none;margin:8vh auto 0;width:min(90vw,420px);padding:40px 28px;text-align:center}
+#locked svg{width:56px;height:56px;stroke:var(--accent-cyan);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;margin-bottom:16px}
+#locked h2{font-size:1.3rem;margin-bottom:8px}#locked p{color:var(--text-muted);font-size:.95rem;margin-bottom:22px}
+.bar{height:9px;border-radius:6px;background:rgba(255,255,255,.18);overflow:hidden}.bar i{display:block;height:100%;border-radius:6px;background:linear-gradient(90deg,var(--accent-cyan),var(--accent-blue))}
+.bar-label{margin-top:10px;font-size:.85rem;font-weight:700;color:var(--text-muted)}
+/* deck */
+#deck{display:none;position:relative;--ch:min(calc(100dvh - 215px),calc(min(84vw,380px)*1.62));--cw:calc(var(--ch)/1.62);height:var(--ch);margin:0 auto;width:100%;touch-action:pan-y;user-select:none;-webkit-user-select:none}
+@media(min-width:900px){#deck{--ch:min(calc(100dvh - 190px),540px);--cw:min(calc(var(--ch)*1.78),74vw)}}
+.card{position:absolute;left:50%;top:0;width:var(--cw);height:var(--ch);margin-left:calc(var(--cw)/-2);border-radius:28px;overflow:hidden;background:#111;box-shadow:0 24px 50px rgba(0,0,0,.45);border:1px solid var(--glass-border);transition:transform .38s cubic-bezier(.2,.8,.2,1),opacity .3s,filter .3s;cursor:grab}
+.card.side{filter:blur(3px) brightness(.7);cursor:pointer}
+.art{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:4rem;font-weight:800;color:#fff}.art img{width:100%;height:100%;object-fit:cover;pointer-events:none;-webkit-user-drag:none}
+.card.locked .art{filter:grayscale(1)}
+.lockov{position:absolute;inset:0;display:none;align-items:flex-start;justify-content:center;padding-top:22%;background:rgba(5,5,16,.3);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px)}
+.card.locked .lockov{display:flex}.lockov svg{width:54px;height:54px;stroke:#fff;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.info{position:absolute;left:0;right:0;bottom:0;height:32%;min-height:178px;padding:0 20px 20px;display:flex;align-items:flex-end;color:#fff;transition:opacity .3s}
+.info::before{content:"";position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,0),rgba(0,0,0,.94));backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);-webkit-mask-image:linear-gradient(to bottom,transparent,#000 55%);mask-image:linear-gradient(to bottom,transparent,#000 55%)}
+.ib{position:relative;width:100%}.ib h2{font-size:1.5rem;font-weight:800;margin-bottom:4px}.ib .d{font-size:.88rem;line-height:1.4;opacity:.82;margin-bottom:10px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.best{font-size:.82rem;font-weight:700;margin-bottom:8px;color:var(--accent-cyan)}.best:empty{display:none}.ib .bar{margin-bottom:10px}
+.play{width:100%;padding:13px;font-size:1rem}.play:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none}
+.card.side .info{opacity:0}
+@media(min-width:900px){.info{left:auto;top:0;width:35%;height:auto;min-height:0;padding:28px;align-items:center}
+ .info::before{background:linear-gradient(to right,rgba(0,0,0,0),rgba(0,0,0,.94) 45%);-webkit-mask-image:linear-gradient(to right,transparent,#000 45%);mask-image:linear-gradient(to right,transparent,#000 45%)}
+ .ib h2{font-size:2rem}.ib .d{-webkit-line-clamp:6;font-size:.95rem}.play{width:auto;padding:13px 40px}}
+.arr{display:none;position:absolute;top:50%;z-index:20;width:48px;height:48px;margin-top:-24px;border-radius:50%;border:1px solid var(--glass-border);background:var(--glass-bg);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);color:var(--text-main);font-size:1.3rem;cursor:pointer}
+@media(min-width:900px){.arr{display:block}#aL{left:calc(50% - var(--cw)/2 - 70px)}#aR{right:calc(50% - var(--cw)/2 - 70px)}}
+/* play window */
+#pov{position:fixed;inset:0;z-index:3000;display:none;background:rgba(5,5,16,0);transition:background .5s}#pov.open{display:block}#pov.on{background:rgba(5,5,16,.72)}
+#pwin{position:fixed;display:flex;flex-direction:column;border-radius:28px;overflow:hidden;background:#000 center/cover;border:1px solid var(--glass-border);transition:left .5s cubic-bezier(.2,.8,.2,1),top .5s cubic-bezier(.2,.8,.2,1),width .5s cubic-bezier(.2,.8,.2,1),height .5s cubic-bezier(.2,.8,.2,1),border-radius .5s}
+#pov.fs #pwin{left:0!important;top:0!important;width:100vw!important;height:100dvh!important;border-radius:0;border:none}
+.pstrip{display:flex;justify-content:flex-end;gap:10px;padding:10px 12px 4px;background:var(--bg-color);opacity:0;transition:opacity .3s}#pov.on .pstrip{opacity:1}
+.pbtn{width:42px;height:42px;border-radius:14px;border:1px solid rgba(255,255,255,.22);background:linear-gradient(135deg,rgba(255,255,255,.2),rgba(255,255,255,.04));backdrop-filter:blur(18px) saturate(1.6);-webkit-backdrop-filter:blur(18px) saturate(1.6);box-shadow:inset 0 1px 0 rgba(255,255,255,.4),0 6px 18px rgba(0,0,0,.25);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .2s,background .2s}.pbtn:active{transform:scale(.92)}
+.pbtn svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}.pbtn.x{color:#ff6b6b;border-color:rgba(255,107,107,.45)}
+#pf{flex:1;width:100%;border:none;background:transparent;opacity:0;transition:opacity .4s}#pwin.ready #pf{opacity:1}#pwin.done{background-image:none!important;background-color:var(--bg-color)}
+</style></head><body>
+<div id="global-loader" class="glass-loader"><div class="loader-spinner"></div><h2 class="loader-text">Loading...</h2></div>
+<div class="orb-container"><div class="orb orb-1"></div><div class="orb orb-2"></div></div>
+<nav class="app-nav">
+  <div class="nav-brand"><img src="resources/images/logo.png" alt="Logo"><span>NoFap</span></div>
+  <div class="nav-links">
+    <a href="dashboard.html" class="nav-item"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span>Home</span></a>
+    <a href="chats.html" class="nav-item"><svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg><span>Chats</span></a>
+    <a href="games.html" class="nav-item active"><svg viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M12 12h.01M16 12h.01M8 12h.01M6 12h.01"/></svg><span>Games</span></a>
+    <a href="profile.html" class="nav-item"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>Profile</span></a>
+    <button class="nav-item" id="themeToggle" aria-label="Toggle theme" style="font-size:1.3rem">🌙</button>
+  </div>
+</nav>
+<main>
+  <div id="locked" class="glass-panel">
+    <svg viewBox="0 0 24 24"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+    <h2>Games are locked</h2><p>Reach a 7-day streak to unlock the games section.</p>
+    <div class="bar"><i id="lbar" style="width:0"></i></div><div class="bar-label" id="llabel"></div>
+  </div>
+  <div id="deck"><button class="arr" id="aL" aria-label="Previous">&#8249;</button><button class="arr" id="aR" aria-label="Next">&#8250;</button></div>
+</main>
+<div id="pov"><div id="pwin"><div class="pstrip">
+  <button class="pbtn" id="fs" aria-label="Fullscreen"><svg viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M8 21H5a2 2 0 0 1-2-2v-3M16 21h3a2 2 0 0 0 2-2v-3"/></svg></button>
+  <button class="pbtn x" id="px" aria-label="Close game"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+</div><iframe id="pf" title="Game" allow="fullscreen"></iframe></div></div>
+<script type="module">
+import { auth, db, $, hideLoader, dateStr, initTheme } from "./shared.js";
+import { GAMES } from "./config.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+import { doc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+initTheme($('themeToggle'));
+const LOCK = '<svg viewBox="0 0 24 24"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>';
+const n = GAMES.length, wide = () => innerWidth >= 900;
+let uid, streak = 0, cur = 0, dx = 0, drag = null, cards = [], ignorePop = false, justDragged = false, openIdx = -1;
+const coverUrl = g => g.dir ? `resources/gameResources/${g.dir}/cover_${wide() ? 'hori' : 'vert'}.webp` : '';
+onAuthStateChanged(auth, async user => {
+  if (!user) return location.replace("index.html");
+  uid = user.uid;
+  try {
+    const u = (await getDoc(doc(db, "users", uid))).data() || {};
+    const t = dateStr(), y = dateStr(new Date(Date.now() - 864e5));
+    streak = (u.lastLogDate === t || u.lastLogDate === y) ? (u.currentStreak || 0) : 0;
+    render(); hideLoader();
+  } catch (e) { console.error(e); alert("Couldn't load games (" + (e.code || e.message) + ")."); hideLoader(); }
+});
+function render() {
+  const min = Math.min(...GAMES.map(g => g.days));
+  if (streak < min) { $('locked').style.display = 'block'; $('lbar').style.width = Math.min(100, streak / min * 100) + '%'; $('llabel').textContent = `${streak} of ${min} days`; return; }
+  const deck = $('deck'); deck.style.display = 'block';
+  GAMES.forEach((g, i) => {
+    const locked = streak < g.days, soon = !g.url, c = document.createElement('div');
+    c.className = 'card' + (locked ? ' locked' : '');
+    const art = g.dir ? `<picture><source media="(min-width:900px)" srcset="resources/gameResources/${g.dir}/cover_hori.webp"><img src="resources/gameResources/${g.dir}/cover_vert.webp" alt="" draggable="false"></picture>` : g.glyph;
+    c.innerHTML = `<div class="art" style="${g.dir ? '' : `background:linear-gradient(135deg,${g.c[0]},${g.c[1]})`}">${art}</div><div class="lockov">${LOCK}</div>
+      <div class="info"><div class="ib"><h2></h2><p class="d"></p><div class="best"></div>
+      ${locked ? `<div class="bar"><i style="width:${Math.min(100, streak / g.days * 100)}%"></i></div>` : ''}
+      <button class="btn-primary play" ${(locked || soon) ? 'disabled' : ''}>${locked ? `Unlocks at ${g.days} days · ${g.days - streak} to go` : soon ? 'Coming soon' : 'Play'}</button></div></div>`;
+    c.querySelector('h2').textContent = g.name; c.querySelector('.d').textContent = g.desc;
+    c.querySelector('.play').onclick = () => openGame(i);
+    c.onclick = () => { if (i !== cur && !justDragged) { cur = i; pos(); } };
+    deck.appendChild(c); cards.push(c);
+    if (!locked && !soon) loadBest(i);
+  });
+  pos(); addEventListener('resize', () => { pos(); if (openIdx >= 0) layout(); });
+}
+async function loadBest(i) {
+  try { const s = await getDoc(doc(db, "users", uid, "games", GAMES[i].id)); const b = s.exists() ? (s.data().highScore || 0) : 0; if (b) cards[i].querySelector('.best').textContent = `Your best: ${b.toLocaleString()}`; } catch {}
+}
+function pos() {
+  cards.forEach((c, i) => {
+    let r = ((i - cur) % n + n) % n; if (r > n / 2) r -= n;
+    const ab = Math.abs(r), w = c.offsetWidth; let x = r * (wide() ? .62 : .72) * w, rot = 0;
+    if (r === 0) { x += dx; rot = dx / w * 14; }
+    c.style.transform = `translateX(${x}px) scale(${1 - .14 * Math.min(ab, 2)}) rotate(${rot}deg)`;
+    c.style.zIndex = 10 - ab; c.style.opacity = ab > 1 ? 0 : 1; c.style.pointerEvents = ab > 1 ? 'none' : 'auto'; c.classList.toggle('side', ab > 0);
+  });
+}
+const go = d => { cur = (cur + d + n) % n; pos(); };
+const deckEl = $('deck');
+deckEl.addEventListener('pointerdown', e => { if (e.target.closest('button') || !cards[cur].contains(e.target)) return; drag = { x: e.clientX, t: Date.now() }; cards[cur].style.transition = 'none'; deckEl.setPointerCapture(e.pointerId); });
+deckEl.addEventListener('pointermove', e => { if (!drag) return; dx = e.clientX - drag.x; pos(); });
+const endDrag = () => {
+  if (!drag) return; const c = cards[cur], w = c.offsetWidth, v = dx / (Date.now() - drag.t + 1);
+  c.style.transition = ''; justDragged = Math.abs(dx) > 6; setTimeout(() => justDragged = false, 0);
+  const d = dx; dx = 0; drag = null; if (Math.abs(d) > w * .2 || Math.abs(v) > .5) cur = (cur + (d < 0 ? 1 : -1) + n) % n; pos();
+};
+deckEl.addEventListener('pointerup', endDrag); deckEl.addEventListener('pointercancel', endDrag);
+$('aL').onclick = () => go(-1); $('aR').onclick = () => go(1);
+addEventListener('keydown', e => { if (openIdx >= 0 || !cards.length) return; if (e.key === 'ArrowLeft') go(-1); if (e.key === 'ArrowRight') go(1); });
+/* card -> game window */
+const setRect = r => { const w = $('pwin').style; w.left = r.left + 'px'; w.top = r.top + 'px'; w.width = r.width + 'px'; w.height = r.height + 'px'; };
+function layout() {
+  const m = wide(), tw = Math.min(innerWidth - (m ? 60 : 16), m ? 1100 : 560), th = m ? Math.min(innerHeight - 60, 780) : innerHeight - 16;
+  setRect({ left: (innerWidth - tw) / 2, top: (innerHeight - th) / 2, width: tw, height: th });
+}
+function openGame(i) {
+  const g = GAMES[i], w = $('pwin'); openIdx = i;
+  w.classList.remove('ready', 'done'); w.style.backgroundImage = g.dir ? `url(${coverUrl(g)})` : `linear-gradient(135deg,${g.c[0]},${g.c[1]})`;
+  w.style.transition = 'none'; setRect(cards[i].getBoundingClientRect());
+  $('pov').classList.add('open'); document.body.classList.add('playing'); void w.offsetWidth; w.style.transition = '';
+  $('pf').onload = () => { w.classList.add('ready'); setTimeout(() => w.classList.add('done'), 450); }; $('pf').src = g.url;
+  requestAnimationFrame(() => { $('pov').classList.add('on'); layout(); });
+  history.pushState({ g: 1 }, '');
+}
+function closeGame() {
+  if (openIdx < 0) return; const i = openIdx, w = $('pwin');
+  $('pov').classList.remove('on', 'fs'); if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+  w.classList.remove('ready', 'done'); setRect(cards[i].getBoundingClientRect());
+  setTimeout(() => { $('pov').classList.remove('open'); document.body.classList.remove('playing'); $('pf').src = 'about:blank'; openIdx = -1; loadBest(i); }, 520);
+  if (history.state?.g) { ignorePop = true; history.back(); }
+}
+const askClose = () => { try { $('pf').contentWindow.postMessage({ type: 'REQUEST_CLOSE' }, location.origin); } catch { closeGame(); } };
+$('px').onclick = askClose;
+$('fs').onclick = () => { const o = $('pov'), on = !o.classList.contains('fs'); o.classList.toggle('fs', on); if (on) o.requestFullscreen?.().catch(() => {}); else if (document.fullscreenElement) document.exitFullscreen().catch(() => {}); };
+document.addEventListener('fullscreenchange', () => { if (!document.fullscreenElement) $('pov').classList.remove('fs'); });
+addEventListener('message', e => { if (e.origin === location.origin && e.data?.type === 'CLOSE_GAME') closeGame(); });
+addEventListener('popstate', () => { if (ignorePop) { ignorePop = false; return; } if (openIdx >= 0) { history.pushState({ g: 1 }, ''); askClose(); } });
+</script></body></html>
