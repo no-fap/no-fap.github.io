@@ -52,6 +52,11 @@ input[type=range]::-moz-range-thumb{height:24px;width:24px;border:none;border-ra
 .squad-empty-card{padding:30px;text-align:center;border:1px dashed var(--glass-border);display:flex;flex-direction:column;align-items:center;gap:15px;color:var(--text-muted);font-size:.95rem}
 .btn-outline{border:1px solid var(--text-main);color:var(--text-main);padding:10px 20px;border-radius:12px;font-weight:600;text-decoration:none;transition:background .3s,color .3s}
 .btn-outline:hover{background:var(--text-main);color:var(--bg-color)}
+.ach-overlay{position:fixed;inset:0;z-index:4000;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(5,5,16,.75);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);opacity:0;visibility:hidden;transition:opacity .3s,visibility .3s}
+.ach-overlay.active{opacity:1;visibility:visible}.ach-card{width:100%;max-width:360px;padding:32px 24px;text-align:center;transform:scale(.92);transition:transform .4s cubic-bezier(.175,.885,.32,1.275)}
+.ach-overlay.active .ach-card{transform:none}.ach-card img{width:120px;height:120px;border-radius:28px;margin-bottom:16px;box-shadow:0 14px 40px rgba(0,240,255,.25)}
+.ach-tag{font-size:.75rem;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--accent-cyan);margin-bottom:8px}.ach-card h2{font-size:1.4rem;margin-bottom:6px}
+.ach-card p{color:var(--text-muted);font-size:.9rem;margin-bottom:6px}.ach-card .btn-primary{margin-top:18px;width:100%}
 </style></head><body>
 <div id="global-loader" class="glass-loader"><div class="loader-spinner"></div><h2 class="loader-text">Loading...</h2></div>
 <div class="orb-container"><div class="orb orb-1"></div><div class="orb orb-2"></div></div>
@@ -80,15 +85,16 @@ input[type=range]::-moz-range-thumb{height:24px;width:24px;border:none;border-ra
   </div>
   <div><h2 class="section-title">Your Squad</h2><div class="glass-panel squad-empty-card"><p>You walk alone. Join a squad for accountability.</p><a href="chats.html" class="btn-outline">Join a Group</a></div></div>
 </main>
+<div class="ach-overlay" id="ach-modal"><div class="glass-panel ach-card"><div class="ach-tag">Achievement unlocked</div><img id="ach-img" alt=""><h2 id="ach-name"></h2><p id="ach-days"></p><p id="ach-reward"></p><button class="btn-primary" id="ach-ok">Continue</button></div></div>
 <script type="module">
 import { auth, db, $, hideLoader, dateStr, initTheme } from "./shared.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-import { doc, getDoc, setDoc, writeBatch, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+import { ACHS, MILESTONES, AIMG } from "./config.js";
+import { collection, getDocs, doc, getDoc, setDoc, writeBatch, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 initTheme($('themeToggle'));
 if (matchMedia('(min-width:769px)').matches) $('brand').style.display = 'flex';
 const IMG = n => `resources/images/${n}.svg`, Z = IMG('streak-bolt-zero'), A = IMG('streak-bolt-active'), B = IMG('streak-bolt-broken'), G = IMG('streak-bolt-milestone-green'), C = IMG('streak-crown-gold');
-const MILESTONES = [7, 15, 30, 50, 100, 200, 300, 600];
-let uid, u, failed = false, busy = false;
+let uid, u, failed = false, busy = false; const have = new Set();
 const T = () => dateStr(), Y = () => dateStr(new Date(Date.now() - 864e5));
 // A streak is only alive if the last log was today or yesterday; otherwise it has silently broken.
 const eff = () => (u.lastLogDate === T() || u.lastLogDate === Y()) ? (u.currentStreak || 0) : 0;
@@ -104,6 +110,7 @@ onAuthStateChanged(auth, async user => {
     // Backfill public profile for accounts created before it existed
     const p = await getDoc(doc(db, "publicProfiles", uid));
     if (!p.exists()) await setDoc(doc(db, "publicProfiles", uid), { nickname: u.nickname, currentStreak: u.currentStreak || 0, lastLogDate: u.lastLogDate || '' }).catch(console.error);
+    try { (await getDocs(collection(db, "users", uid, "unlocks"))).forEach(d => have.add(d.id)); } catch (e) { console.warn(e.code); }
     render(); hideLoader();
   } catch (e) { console.error(e); alert("Couldn't load your data. Check your connection and refresh."); }
 });
@@ -144,15 +151,24 @@ async function save(clean, hours, masturbated) {
   if (busy) return; busy = true; $('global-loader').classList.remove('hidden');
   const today = T(), base = eff();
   const cur = clean ? base + 1 : 0, high = Math.max(cur, u.highestStreak || 0);
+  const gained = clean ? ACHS.filter(a => a.days > base && a.days <= cur) : [];
   const fields = { currentStreak: cur, highestStreak: high, lastLogDate: today, lastLogStatus: clean ? 'clean' : 'failed' };
   try {
     const b = writeBatch(db);
     b.update(doc(db, "users", uid), { ...fields, lastLogAt: serverTimestamp() });
     b.set(doc(db, "users", uid, "logs", today), { date: today, masturbated: !!masturbated, pornHours: hours });
+    gained.forEach(a => { if (!have.has('d' + a.days)) b.set(doc(db, "users", uid, "unlocks", 'd' + a.days), { days: a.days, at: serverTimestamp() }); });
     b.set(doc(db, "publicProfiles", uid), { nickname: u.nickname, currentStreak: cur, lastLogDate: today });
     await b.commit();
     Object.assign(u, fields); failed = false; render();
-  } catch (e) { console.error(e); alert("Couldn't save your log (already logged today, or network error). Refresh and try again."); }
+    gained.forEach(a => have.add('d' + a.days));
+    if (gained.length) setTimeout(() => popup(gained[gained.length - 1]), 600);
+  } catch (e) { console.error(e); alert("Couldn't save your log (" + (e.code || e.message) + "). Refresh and try again."); }
   busy = false; hideLoader();
 }
+function popup(a) {
+  $('ach-img').src = AIMG(a.img); $('ach-name').textContent = a.name; $('ach-days').textContent = `${a.days} day${a.days > 1 ? 's' : ''} clean`; $('ach-reward').textContent = a.reward;
+  $('ach-modal').classList.add('active');
+}
+$('ach-ok').onclick = () => $('ach-modal').classList.remove('active');
 </script></body></html>
