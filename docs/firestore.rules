@@ -13,16 +13,31 @@ service cloud.firestore {
         && request.resource.data.nickname is string
         && request.resource.data.nickname.size() > 0 && request.resource.data.nickname.size() <= 20;
       allow update: if me(uid)
-        && request.resource.data.diff(resource.data).affectedKeys()
-             .hasOnly(['currentStreak','highestStreak','lastLogDate','lastLogStatus','lastLogAt'])
-        && request.resource.data.lastLogAt == request.time
-        // One log per calendar day: the date must be near "today" (allows any timezone) and
-        // the matching logs/{date} doc is created in the same batch (create-only, so no repeats).
-        && request.resource.data.lastLogDate in [ymd(request.time - duration.value(1, 'd')), ymd(request.time), ymd(request.time + duration.value(1, 'd'))]
-        && request.resource.data.lastLogDate != resource.data.get('lastLogDate', '')
-        && existsAfter(/databases/$(db)/documents/users/$(uid)/logs/$(request.resource.data.lastLogDate))
-        && request.resource.data.currentStreak in [0, 1, resource.data.currentStreak + 1]
-        && request.resource.data.highestStreak == math.max(request.resource.data.currentStreak, resource.data.highestStreak);
+        && (
+          // Daily check-in streak update
+          (
+            request.resource.data.diff(resource.data).affectedKeys()
+              .hasOnly(['currentStreak','highestStreak','lastLogDate','lastLogStatus','lastLogAt'])
+            && request.resource.data.lastLogAt == request.time
+            && request.resource.data.lastLogDate in [ymd(request.time - duration.value(1, 'd')), ymd(request.time), ymd(request.time + duration.value(1, 'd'))]
+            && request.resource.data.lastLogDate != resource.data.get('lastLogDate', '')
+            && existsAfter(/databases/$(db)/documents/users/$(uid)/logs/$(request.resource.data.lastLogDate))
+            && request.resource.data.currentStreak in [0, 1, resource.data.currentStreak + 1]
+            && request.resource.data.highestStreak == math.max(request.resource.data.currentStreak, resource.data.highestStreak)
+          )
+          ||
+          // Profile customizations (nickname, username, avatar, bio, tag, updatedAt)
+          (
+            request.resource.data.diff(resource.data).affectedKeys()
+              .hasOnly(['nickname','username','avatar','bio','tag','updatedAt'])
+            && (!('nickname' in request.resource.data) || (request.resource.data.nickname is string && request.resource.data.nickname.size() > 0 && request.resource.data.nickname.size() <= 20))
+            && (!('username' in request.resource.data) || (request.resource.data.username is string && request.resource.data.username.size() >= 3 && request.resource.data.username.size() <= 20))
+            && (!('bio' in request.resource.data) || (request.resource.data.bio is string && request.resource.data.bio.size() <= 160))
+            && (!('avatar' in request.resource.data) || (request.resource.data.avatar is string && request.resource.data.avatar.size() <= 150000))
+            && (!('tag' in request.resource.data) || request.resource.data.tag is string)
+          )
+        );
+
       match /logs/{d} {
         allow read: if me(uid);
         allow create: if me(uid) && d == request.resource.data.date
@@ -31,16 +46,45 @@ service cloud.firestore {
           && request.resource.data.pornHours is number
           && request.resource.data.pornHours >= 0 && request.resource.data.pornHours <= 5.5;
       }
+
+      match /unlocks/{badgeId} {
+        allow read: if me(uid);
+        allow create, update: if me(uid);
+      }
+
+      match /games/{gameId} {
+        allow read: if me(uid);
+        allow create, update: if me(uid);
+      }
     }
 
-    // Only nickname + streak are public; must mirror the private doc.
+    // Public Profiles - accessible to anyone for leaderboard & public warrior URLs
     match /publicProfiles/{uid} {
       allow read: if true;
       allow create, update: if me(uid)
-        && request.resource.data.keys().hasOnly(['nickname','currentStreak','lastLogDate'])
-        && request.resource.data.nickname == u(uid).nickname
-        && request.resource.data.currentStreak == u(uid).currentStreak
-        && request.resource.data.lastLogDate == u(uid).get('lastLogDate', '');
+        && request.resource.data.nickname is string
+        && request.resource.data.nickname.size() > 0 && request.resource.data.nickname.size() <= 20
+        && request.resource.data.currentStreak is number;
+    }
+
+    // Unique Username Registry: ensures no duplicate usernames across users
+    match /usernames/{username} {
+      allow read: if true;
+      allow create: if request.auth != null && request.resource.data.uid == request.auth.uid;
+      allow update: if request.auth != null && request.resource.data.uid == request.auth.uid && resource.data.uid == request.auth.uid;
+      allow delete: if request.auth != null && resource.data.uid == request.auth.uid;
+    }
+
+    // High scores for 2048
+    match /highScores/{id} {
+      allow read: if true;
+      allow create, update: if request.auth != null;
+    }
+
+    // Tic-Tac-Toe multiplayer matches
+    match /tttMatches/{id} {
+      allow read: if true;
+      allow create, update: if request.auth != null;
     }
   }
 }

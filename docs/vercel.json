@@ -1,0 +1,12 @@
+{
+  "cleanUrls": true,
+  "rewrites": [
+    { "source": "/dashboard", "destination": "/dashboard.html" },
+    { "source": "/games", "destination": "/games.html" },
+    { "source": "/profile", "destination": "/profile.html" },
+    { "source": "/chats", "destination": "/chats.html" },
+    { "source": "/onboarding", "destination": "/onboarding.html" },
+    { "source": "/privacy-policy", "destination": "/privacy-policy/index.html" },
+    { "source": "/:username", "destination": "/profile.html" }
+  ]
+}
