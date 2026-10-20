@@ -1,0 +1,4010 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Chats &amp; Squads - NoFap</title>
+<link rel="icon" type="image/png" href="resources/images/logo.png">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared.css">
+<style>
+/* ============================================================================
+ * 1. DESIGN TOKENS & DUAL-THEME GLASS SYSTEM
+ * ============================================================================ */
+:root {
+  --bg-color: #050510;
+  --bg-elevated: rgba(13, 18, 36, .82);
+  --bg-panel: rgba(10, 14, 28, .72);
+  --text-main: #ffffff;
+  --text-muted: #94a3b8;
+  --text-dim: #64748b;
+  --glass-bg: rgba(255, 255, 255, .035);
+  --glass-border: rgba(255, 255, 255, .09);
+  --glass-shadow: 0 18px 46px rgba(0, 0, 0, .5);
+  --nav-bg: rgba(5, 5, 16, .82);
+  --surface-inset: rgba(0, 0, 0, .34);
+  --surface-hover: rgba(255, 255, 255, .06);
+  --modal-backdrop: rgba(4, 6, 16, .85);
+  --accent-cyan: #00f0ff;
+  --accent-blue: #0066ff;
+  --accent-emerald: #10b981;
+  --accent-gold: #f5b301;
+  --accent-crimson: #ef4444;
+  --accent-purple: #a855f7;
+  --msg-own-bg: linear-gradient(135deg, rgba(0, 240, 255, .18), rgba(0, 102, 255, .24));
+  --msg-own-border: rgba(0, 240, 255, .38);
+  --msg-other-bg: rgba(255, 255, 255, .05);
+  --msg-other-border: rgba(255, 255, 255, .1);
+}
+
+[data-theme="light"] {
+  --bg-color: #f4f6f9;
+  --bg-elevated: rgba(255, 255, 255, .92);
+  --bg-panel: rgba(255, 255, 255, .82);
+  --text-main: #0f172a;
+  --text-muted: #475569;
+  --text-dim: #94a3b8;
+  --glass-bg: rgba(255, 255, 255, .74);
+  --glass-border: rgba(15, 23, 42, .09);
+  --glass-shadow: 0 14px 36px rgba(15, 23, 42, .08);
+  --nav-bg: rgba(255, 255, 255, .86);
+  --surface-inset: rgba(15, 23, 42, .05);
+  --surface-hover: rgba(15, 23, 42, .06);
+  --modal-backdrop: rgba(15, 23, 42, .55);
+  --msg-own-bg: linear-gradient(135deg, rgba(0, 102, 255, .14), rgba(0, 200, 255, .18));
+  --msg-own-border: rgba(0, 102, 255, .32);
+  --msg-other-bg: rgba(15, 23, 42, .045);
+  --msg-other-border: rgba(15, 23, 42, .1);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  background: var(--bg-color);
+  color: var(--text-main);
+  height: 100dvh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ============================================================================
+ * 2. APP NAVBAR
+ * ============================================================================ */
+.app-nav {
+  position: fixed;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--nav-bg);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid var(--glass-border);
+}
+.nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 800;
+  font-size: 1.2rem;
+  color: var(--text-main);
+  text-decoration: none;
+}
+.nav-brand img { width: 32px; height: 32px; border-radius: 8px; }
+.nav-links {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  justify-content: space-around;
+  width: 100%;
+}
+.nav-item {
+  color: var(--text-muted);
+  text-decoration: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  font-size: .85rem;
+  font-weight: 600;
+  transition: color .25s, transform .2s;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+.nav-item:hover { transform: translateY(-2px); color: var(--text-main); }
+.nav-item.active { color: var(--text-main); }
+.nav-item svg {
+  width: 24px;
+  height: 24px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.nav-item.active svg {
+  stroke: var(--accent-cyan);
+  filter: drop-shadow(0 0 8px rgba(0, 240, 255, .45));
+}
+
+@media (min-width: 769px) {
+  .app-nav {
+    top: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: calc(100% - 40px);
+    max-width: 1320px;
+    border-radius: 20px;
+    padding: 13px 28px;
+  }
+  .nav-item { flex-direction: row; gap: 10px; font-size: .96rem; }
+  .nav-links { width: auto; }
+}
+@media (max-width: 768px) {
+  .app-nav {
+    bottom: max(12px, env(safe-area-inset-bottom));
+    left: 50%;
+    transform: translateX(-50%);
+    width: 92%;
+    max-width: 400px;
+    border-radius: 50px;
+    padding: 12px 22px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, .5);
+  }
+  .nav-brand, .nav-item span { display: none; }
+  body.mobile-chat-open .app-nav { display: none; }
+}
+
+/* ============================================================================
+ * 3. CHATS SHELL & TOP COMMAND BAR (WITH NOFAP LOGO PILL)
+ * ============================================================================ */
+.chats-shell {
+  width: 100%;
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 90px 20px 20px;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+@media (max-width: 768px) {
+  .chats-shell {
+    padding: 12px 10px 84px;
+    gap: 10px;
+  }
+  body.mobile-chat-open .chats-shell {
+    padding: 8px 0 0;
+  }
+  body.mobile-chat-open .command-bar {
+    display: none;
+  }
+}
+
+.command-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  flex: none;
+}
+
+.logo-header-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 14px 7px 9px;
+  border-radius: 999px;
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border);
+  text-decoration: none;
+  color: var(--text-main);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, .2);
+}
+.logo-header-pill img {
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+}
+.logo-pill-title {
+  font-weight: 800;
+  font-size: .92rem;
+  letter-spacing: -.3px;
+}
+.logo-pill-sep {
+  width: 1px;
+  height: 13px;
+  background: var(--glass-border);
+}
+.logo-pill-sub {
+  font-size: .7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--accent-cyan);
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.live-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent-emerald);
+  box-shadow: 0 0 8px var(--accent-emerald);
+}
+
+.command-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.chip-btn {
+  background: var(--glass-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--glass-border);
+  color: var(--text-main);
+  padding: 7px 13px;
+  border-radius: 999px;
+  font-size: .76rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all .2s ease;
+  text-decoration: none;
+}
+.chip-btn:hover {
+  transform: translateY(-1px);
+  border-color: rgba(0, 240, 255, .45);
+}
+.chip-btn.primary {
+  background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
+  color: #050510;
+  border: none;
+  font-weight: 800;
+  box-shadow: 0 6px 18px rgba(0, 240, 255, .25);
+}
+.chip-btn svg {
+  width: 14px;
+  height: 14px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* ============================================================================
+ * 4. WORKSPACE SPLIT LAYOUT (SIDEBAR + ACTIVE CHAT PANE)
+ * ============================================================================ */
+.comms-workspace {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 370px 1fr;
+  gap: 16px;
+}
+@media (max-width: 960px) {
+  .comms-workspace { grid-template-columns: 320px 1fr; }
+}
+@media (max-width: 768px) {
+  .comms-workspace {
+    grid-template-columns: 1fr;
+    position: relative;
+  }
+}
+
+.sidebar-pane, .chat-pane {
+  background: var(--bg-panel);
+  backdrop-filter: blur(28px) saturate(1.4);
+  -webkit-backdrop-filter: blur(28px) saturate(1.4);
+  border: 1px solid var(--glass-border);
+  border-radius: 26px;
+  box-shadow: var(--glass-shadow);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+@media (max-width: 768px) {
+  .chat-pane {
+    display: none;
+    border-radius: 0;
+    border: none;
+    height: 100%;
+  }
+  body.mobile-chat-open .sidebar-pane { display: none; }
+  body.mobile-chat-open .chat-pane { display: flex; }
+}
+
+/* Sidebar Top Nav Tabs */
+.sidebar-top {
+  padding: 14px 14px 10px;
+  border-bottom: 1px solid var(--glass-border);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: none;
+}
+
+.primary-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  background: var(--surface-inset);
+  border: 1px solid var(--glass-border);
+  border-radius: 14px;
+  padding: 3px;
+  gap: 3px;
+}
+.pri-tab-btn {
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: .75rem;
+  font-weight: 800;
+  padding: 8px 6px;
+  border-radius: 11px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  transition: all .2s ease;
+  position: relative;
+}
+.pri-tab-btn svg {
+  width: 14px;
+  height: 14px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2.2;
+}
+.pri-tab-btn.active {
+  background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
+  color: #050510;
+  box-shadow: 0 4px 14px rgba(0, 240, 255, .25);
+}
+.req-count-badge {
+  min-width: 17px;
+  height: 17px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: var(--accent-crimson);
+  color: #fff;
+  font-size: .64rem;
+  font-weight: 800;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+.req-count-badge.show { display: inline-flex; }
+
+/* Search & Sub-filter bar */
+.search-box-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.search-box-wrap svg {
+  position: absolute;
+  left: 12px;
+  width: 15px;
+  height: 15px;
+  stroke: var(--text-dim);
+  fill: none;
+  stroke-width: 2.2;
+  pointer-events: none;
+}
+.search-input {
+  width: 100%;
+  padding: 9px 12px 9px 35px;
+  border-radius: 12px;
+  background: var(--surface-inset);
+  border: 1px solid var(--glass-border);
+  color: var(--text-main);
+  font-size: .82rem;
+  font-weight: 600;
+  outline: none;
+  transition: border-color .2s;
+}
+.search-input:focus { border-color: var(--accent-cyan); }
+
+.sub-filter-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+.sub-pills {
+  display: flex;
+  gap: 5px;
+}
+.sub-pill {
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: .69rem;
+  font-weight: 800;
+  border: 1px solid var(--glass-border);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all .18s;
+}
+.sub-pill.active {
+  background: rgba(0, 240, 255, .14);
+  border-color: var(--accent-cyan);
+  color: var(--text-main);
+}
+
+/* Sidebar Scroll List */
+.sidebar-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.chat-row-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 12px;
+  border-radius: 16px;
+  border: 1px solid transparent;
+  background: transparent;
+  cursor: pointer;
+  transition: all .18s ease;
+  text-align: left;
+  width: 100%;
+  color: var(--text-main);
+}
+.chat-row-item:hover {
+  background: var(--surface-hover);
+  border-color: var(--glass-border);
+}
+.chat-row-item.active {
+  background: linear-gradient(135deg, rgba(0, 240, 255, .11), rgba(0, 102, 255, .07));
+  border-color: rgba(0, 240, 255, .38);
+}
+
+.row-avatar {
+  position: relative;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #0c2347, #0066ff);
+  border: 1.5px solid rgba(255, 255, 255, .16);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #fff;
+  flex: none;
+  overflow: hidden;
+}
+.row-avatar.squad-shape { border-radius: 15px; }
+.row-avatar.arena-shape {
+  border-radius: 15px;
+  background: linear-gradient(135deg, #00f0ff, #0066ff);
+  color: #050510;
+}
+.row-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.row-avatar svg {
+  width: 22px;
+  height: 22px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2.2;
+}
+
+.row-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.row-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+.row-title {
+  font-size: .88rem;
+  font-weight: 800;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.row-badge {
+  font-size: .62rem;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: rgba(0, 240, 255, .12);
+  border: 1px solid rgba(0, 240, 255, .28);
+  color: var(--accent-cyan);
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  flex: none;
+}
+.row-time {
+  font-size: .68rem;
+  font-weight: 600;
+  color: var(--text-dim);
+  flex: none;
+}
+.row-sub {
+  font-size: .76rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Request Card & Discover Card inside Sidebar */
+.request-card {
+  padding: 13px;
+  border-radius: 16px;
+  background: var(--surface-inset);
+  border: 1px solid var(--glass-border);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.req-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.req-type-pill {
+  font-size: .63rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .8px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(168, 85, 247, .16);
+  color: #d8b4fe;
+  border: 1px solid rgba(168, 85, 247, .35);
+  width: fit-content;
+}
+.req-actions {
+  display: flex;
+  gap: 8px;
+}
+.req-btn {
+  flex: 1;
+  padding: 7px 10px;
+  border-radius: 10px;
+  font-size: .74rem;
+  font-weight: 800;
+  cursor: pointer;
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg);
+  color: var(--text-main);
+  transition: all .18s;
+}
+.req-btn.accept {
+  background: linear-gradient(135deg, var(--accent-emerald), #059669);
+  color: #fff;
+  border: none;
+}
+.req-btn.decline {
+  color: #f87171;
+  border-color: rgba(239, 68, 68, .3);
+}
+
+/* ============================================================================
+ * 5. ACTIVE CHAT PANE (HEADER + STREAM + STAGING + COMPOSER)
+ * ============================================================================ */
+.chat-empty-state {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 32px;
+  gap: 14px;
+  color: var(--text-muted);
+}
+.empty-icon-circle {
+  width: 68px;
+  height: 68px;
+  border-radius: 22px;
+  background: rgba(0, 240, 255, .08);
+  border: 1px solid rgba(0, 240, 255, .24);
+  color: var(--accent-cyan);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.empty-icon-circle svg {
+  width: 32px;
+  height: 32px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2;
+}
+
+.chat-active-view {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.chat-header {
+  padding: 13px 18px;
+  border-bottom: 1px solid var(--glass-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: rgba(0, 0, 0, .14);
+  flex: none;
+}
+.chat-header-left {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  min-width: 0;
+}
+.mobile-back-btn {
+  display: none;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  border: 1px solid var(--glass-border);
+  background: var(--surface-inset);
+  color: var(--text-main);
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex: none;
+}
+.mobile-back-btn svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2.3; }
+@media (max-width: 768px) {
+  .mobile-back-btn { display: inline-flex; }
+}
+
+.chat-header-avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #0c2347, #0066ff);
+  border: 1.5px solid var(--accent-cyan);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  color: #fff;
+  cursor: zoom-in;
+  overflow: hidden;
+  flex: none;
+}
+.chat-header-avatar.squad-shape { border-radius: 13px; }
+.chat-header-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.chat-header-avatar svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 2.2; }
+
+.chat-header-titles {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.chat-header-name {
+  font-size: .96rem;
+  font-weight: 800;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.chat-header-sub {
+  font-size: .73rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.chat-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex: none;
+}
+.icon-action-btn {
+  height: 35px;
+  padding: 0 11px;
+  border-radius: 11px;
+  border: 1px solid var(--glass-border);
+  background: var(--surface-inset);
+  color: var(--text-main);
+  font-size: .74rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all .18s;
+  text-decoration: none;
+}
+.icon-action-btn:hover {
+  border-color: var(--accent-cyan);
+  color: var(--accent-cyan);
+}
+.icon-action-btn.danger:hover {
+  border-color: var(--accent-crimson);
+  color: var(--accent-crimson);
+}
+.icon-action-btn svg {
+  width: 15px;
+  height: 15px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2.1;
+}
+
+/* Message Stream */
+.messages-stream {
+  flex: 1;
+  overflow-y: auto;
+  padding: 18px 18px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sys-msg-pill {
+  align-self: center;
+  padding: 5px 13px;
+  border-radius: 999px;
+  background: var(--surface-inset);
+  border: 1px solid var(--glass-border);
+  color: var(--text-muted);
+  font-size: .72rem;
+  font-weight: 700;
+  text-align: center;
+  max-width: 88%;
+}
+
+.msg-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 9px;
+  max-width: 82%;
+  position: relative;
+}
+@media (max-width: 600px) {
+  .msg-row { max-width: 90%; }
+}
+.msg-row.own {
+  align-self: flex-end;
+  flex-direction: row-reverse;
+}
+.msg-row.other {
+  align-self: flex-start;
+}
+
+.msg-sender-av {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #1e293b, #0066ff);
+  border: 1px solid var(--glass-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: .75rem;
+  font-weight: 800;
+  color: #fff;
+  overflow: hidden;
+  flex: none;
+  cursor: pointer;
+}
+.msg-sender-av img { width: 100%; height: 100%; object-fit: cover; }
+
+.msg-col {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.msg-row.own .msg-col { align-items: flex-end; }
+.msg-row.other .msg-col { align-items: flex-start; }
+
+.msg-sender-line {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: .7rem;
+  font-weight: 800;
+  color: var(--text-muted);
+  padding: 0 4px;
+}
+.sender-streak-chip {
+  font-size: .62rem;
+  font-weight: 800;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: rgba(0, 240, 255, .1);
+  border: 1px solid rgba(0, 240, 255, .28);
+  color: var(--accent-cyan);
+}
+
+.msg-bubble-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.msg-row.own .msg-bubble-wrap { flex-direction: row-reverse; }
+
+.msg-bubble {
+  padding: 10px 14px;
+  border-radius: 18px;
+  background: var(--msg-other-bg);
+  border: 1px solid var(--msg-other-border);
+  color: var(--text-main);
+  font-size: .88rem;
+  line-height: 1.46;
+  word-break: break-word;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, .18);
+}
+.msg-row.own .msg-bubble {
+  background: var(--msg-own-bg);
+  border-color: var(--msg-own-border);
+  border-bottom-right-radius: 5px;
+}
+.msg-row.other .msg-bubble {
+  border-bottom-left-radius: 5px;
+}
+
+.msg-reply-quote {
+  padding: 6px 10px;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, .26);
+  border-left: 3px solid var(--accent-cyan);
+  font-size: .74rem;
+  color: var(--text-muted);
+}
+.msg-reply-quote b {
+  color: var(--accent-cyan);
+  display: block;
+  font-size: .69rem;
+  margin-bottom: 1px;
+}
+
+/* Hover Quick Actions (React & Reply) */
+.msg-quick-bar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .16s ease;
+}
+.msg-row:hover .msg-quick-bar,
+.msg-row.show-actions .msg-quick-bar {
+  opacity: 1;
+  pointer-events: auto;
+}
+.quick-ico-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1px solid var(--glass-border);
+  background: var(--bg-elevated);
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.quick-ico-btn:hover {
+  color: var(--accent-cyan);
+  border-color: var(--accent-cyan);
+}
+.quick-ico-btn svg { width: 13px; height: 13px; stroke: currentColor; fill: none; stroke-width: 2.2; }
+
+/* Reaction Tray Popover (Allows User Emojis!) */
+.reaction-popover {
+  position: absolute;
+  bottom: calc(100% + 6px);
+  z-index: 60;
+  padding: 5px 8px;
+  border-radius: 999px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, .55);
+  display: none;
+  align-items: center;
+  gap: 4px;
+}
+.msg-row.own .reaction-popover { right: 0; }
+.msg-row.other .reaction-popover { left: 0; }
+.reaction-popover.open { display: inline-flex; }
+.react-emoji-choice {
+  border: none;
+  background: transparent;
+  font-size: 1.12rem;
+  padding: 4px 5px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform .15s, background .15s;
+}
+.react-emoji-choice:hover {
+  transform: scale(1.22);
+  background: rgba(255, 255, 255, .08);
+}
+
+/* Message Reactions Row */
+.msg-reactions-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  padding: 0 2px;
+}
+.reaction-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--surface-inset);
+  border: 1px solid var(--glass-border);
+  font-size: .74rem;
+  font-weight: 700;
+  color: var(--text-main);
+  cursor: pointer;
+  transition: all .16s;
+}
+.reaction-chip.mine {
+  border-color: var(--accent-cyan);
+  background: rgba(0, 240, 255, .14);
+}
+
+/* Attachments inside Message Bubbles */
+.att-photo-standard {
+  max-width: 270px;
+  max-height: 290px;
+  border-radius: 13px;
+  overflow: hidden;
+  border: 1px solid var(--glass-border);
+  cursor: zoom-in;
+  background: #060913;
+}
+.att-photo-standard img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.att-ephemeral-card {
+  min-width: 215px;
+  padding: 11px 13px;
+  border-radius: 14px;
+  background: rgba(5, 8, 20, .65);
+  border: 1px solid rgba(0, 240, 255, .35);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  cursor: pointer;
+  transition: all .2s;
+}
+.att-ephemeral-card:hover:not(.expired) {
+  border-color: var(--accent-cyan);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(0, 240, 255, .16);
+}
+.att-ephemeral-card.expired {
+  border-color: var(--glass-border);
+  opacity: .62;
+  cursor: default;
+}
+.eph-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.eph-badge-ring {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 2px dashed var(--accent-cyan);
+  color: var(--accent-cyan);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: .72rem;
+  font-weight: 800;
+  flex: none;
+}
+.att-ephemeral-card.expired .eph-badge-ring {
+  border-style: solid;
+  border-color: var(--text-dim);
+  color: var(--text-dim);
+}
+.eph-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.eph-title {
+  font-size: .82rem;
+  font-weight: 800;
+}
+.eph-sub {
+  font-size: .68rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.att-pdf-card {
+  min-width: 240px;
+  max-width: 310px;
+  padding: 11px 13px;
+  border-radius: 14px;
+  background: rgba(5, 8, 20, .62);
+  border: 1px solid var(--glass-border);
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+.pdf-icon-box {
+  width: 40px;
+  height: 40px;
+  border-radius: 11px;
+  background: rgba(239, 68, 68, .15);
+  border: 1px solid rgba(239, 68, 68, .4);
+  color: #f87171;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+}
+.pdf-icon-box svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 2.1; }
+.pdf-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.pdf-name {
+  font-size: .8rem;
+  font-weight: 800;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.pdf-size {
+  font-size: .68rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+.pdf-open-btn {
+  padding: 6px 10px;
+  border-radius: 9px;
+  border: 1px solid rgba(0, 240, 255, .38);
+  background: rgba(0, 240, 255, .1);
+  color: var(--accent-cyan);
+  font-size: .71rem;
+  font-weight: 800;
+  cursor: pointer;
+  flex: none;
+}
+
+/* Read Receipts & Timestamp Below Bubble */
+.msg-foot-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 4px;
+  font-size: .66rem;
+  font-weight: 700;
+  color: var(--text-dim);
+}
+.seen-dm-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--accent-cyan);
+}
+.seen-dm-label svg {
+  width: 12px;
+  height: 12px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2.4;
+}
+
+/* Group Chat Sender-Only "Seen by..." Button */
+.seen-group-btn {
+  border: 1px solid rgba(0, 240, 255, .28);
+  background: rgba(0, 240, 255, .08);
+  color: var(--accent-cyan);
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: .65rem;
+  font-weight: 800;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: all .18s;
+}
+.seen-group-btn:hover {
+  background: rgba(0, 240, 255, .18);
+  border-color: var(--accent-cyan);
+}
+.seen-group-btn svg {
+  width: 11px;
+  height: 11px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2.3;
+}
+
+/* Pending DM Request Banner Inside Chat Stream */
+.dm-request-gate-bar {
+  padding: 14px 18px;
+  background: linear-gradient(135deg, rgba(168, 85, 247, .15), rgba(0, 102, 255, .12));
+  border-top: 1px solid rgba(168, 85, 247, .35);
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.dm-request-gate-bar.show { display: flex; }
+
+/* Staging Bar (Reply / Photo Mode / PDF Upload Progress) */
+.composer-staging-bar {
+  padding: 10px 16px;
+  background: var(--surface-inset);
+  border-top: 1px solid var(--glass-border);
+  display: none;
+  flex-direction: column;
+  gap: 8px;
+}
+.composer-staging-bar.show { display: flex; }
+
+.stage-item-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.stage-preview-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+.stage-thumb {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  object-fit: cover;
+  border: 1px solid var(--accent-cyan);
+}
+.view-mode-pills {
+  display: inline-flex;
+  background: rgba(0, 0, 0, .35);
+  border: 1px solid var(--glass-border);
+  border-radius: 999px;
+  padding: 2px;
+  gap: 2px;
+}
+.vmode-btn {
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: .68rem;
+  font-weight: 800;
+  padding: 4px 10px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+.vmode-btn.active {
+  background: var(--accent-cyan);
+  color: #050510;
+}
+
+.upload-progress-wrap {
+  width: 100%;
+  display: none;
+  flex-direction: column;
+  gap: 4px;
+}
+.upload-progress-wrap.show { display: flex; }
+.upload-progress-track {
+  width: 100%;
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .1);
+  overflow: hidden;
+}
+.upload-progress-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--accent-cyan), var(--accent-blue));
+  transition: width .2s ease;
+}
+
+/* Composer Input Bar */
+.chat-composer {
+  padding: 12px 16px;
+  border-top: 1px solid var(--glass-border);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+  flex: none;
+}
+
+.comp-tool-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  border: 1px solid var(--glass-border);
+  background: var(--surface-inset);
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex: none;
+  transition: all .18s;
+}
+.comp-tool-btn:hover {
+  color: var(--accent-cyan);
+  border-color: rgba(0, 240, 255, .4);
+}
+.comp-tool-btn svg {
+  width: 18px;
+  height: 18px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2.1;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.comp-input {
+  flex: 1;
+  padding: 10px 14px;
+  border-radius: 14px;
+  background: var(--surface-inset);
+  border: 1px solid var(--glass-border);
+  color: var(--text-main);
+  font-size: .88rem;
+  font-weight: 500;
+  outline: none;
+  transition: border-color .2s;
+}
+.comp-input:focus { border-color: var(--accent-cyan); }
+
+.comp-send-btn {
+  height: 38px;
+  padding: 0 16px;
+  border-radius: 12px;
+  border: none;
+  background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
+  color: #050510;
+  font-size: .8rem;
+  font-weight: 800;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex: none;
+  box-shadow: 0 6px 18px rgba(0, 240, 255, .24);
+}
+.comp-send-btn:disabled { opacity: .5; cursor: not-allowed; }
+.comp-send-btn svg {
+  width: 15px;
+  height: 15px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2.4;
+}
+
+/* User Emoji Picker Popover (Allows users to insert emojis in messages!) */
+.user-emoji-popover {
+  position: absolute;
+  bottom: calc(100% + 10px);
+  left: 16px;
+  width: 290px;
+  padding: 12px;
+  border-radius: 20px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, .65);
+  z-index: 120;
+  display: none;
+  flex-direction: column;
+  gap: 8px;
+}
+.user-emoji-popover.open { display: flex; }
+.emoji-pop-head {
+  font-size: .68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .9px;
+  color: var(--text-muted);
+  display: flex;
+  justify-content: space-between;
+}
+.emoji-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+.emoji-cell-btn {
+  border: none;
+  background: transparent;
+  font-size: 1.2rem;
+  padding: 5px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform .15s, background .15s;
+}
+.emoji-cell-btn:hover {
+  transform: scale(1.2);
+  background: rgba(255, 255, 255, .08);
+}
+
+/* ============================================================================
+ * 6. MODALS (CREATE SQUAD 1080x1080, SEEN BY POPUP CARD, EPHEMERAL/PDF VIEWER)
+ * ============================================================================ */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 4000;
+  background: var(--modal-backdrop);
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity .26s ease, visibility .26s ease;
+}
+.modal-backdrop.open {
+  opacity: 1;
+  visibility: visible;
+}
+.modal-sheet {
+  width: 100%;
+  max-width: 500px;
+  max-height: 90dvh;
+  overflow-y: auto;
+  padding: 24px 22px;
+  border-radius: 26px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 28px 70px rgba(0, 0, 0, .65);
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+.modal-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.modal-top h2 { font-size: 1.2rem; font-weight: 800; }
+.close-x-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 11px;
+  background: var(--surface-inset);
+  border: 1px solid var(--glass-border);
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.close-x-btn svg { width: 17px; height: 17px; stroke: currentColor; fill: none; stroke-width: 2.2; }
+
+/* 1080x1080 Squad Avatar Cropper */
+.squad-crop-box {
+  padding: 14px;
+  border-radius: 18px;
+  background: var(--surface-inset);
+  border: 1px solid var(--glass-border);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+.squad-crop-viewport {
+  width: 144px;
+  height: 144px;
+  border-radius: 26px;
+  overflow: hidden;
+  border: 2.5px solid var(--accent-cyan);
+  background: #090d16;
+  cursor: grab;
+  touch-action: none;
+}
+#squad-crop-canvas { width: 100%; height: 100%; display: block; }
+
+.field-block {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.field-label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: .72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .8px;
+  color: var(--text-muted);
+}
+.field-input, .field-textarea {
+  width: 100%;
+  padding: 11px 14px;
+  border-radius: 13px;
+  background: var(--surface-inset);
+  border: 1px solid var(--glass-border);
+  color: var(--text-main);
+  font-size: .9rem;
+  font-weight: 600;
+  outline: none;
+}
+.field-input:focus, .field-textarea:focus { border-color: var(--accent-cyan); }
+.field-textarea { resize: vertical; min-height: 68px; }
+
+.btn-primary-full {
+  width: 100%;
+  padding: 13px 20px;
+  border-radius: 14px;
+  border: none;
+  background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
+  color: #050510;
+  font-size: .9rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .6px;
+  cursor: pointer;
+}
+.btn-primary-full:disabled { opacity: .5; cursor: not-allowed; }
+
+/* Seen By Popup Card List */
+.seen-by-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 320px;
+  overflow-y: auto;
+}
+.seen-user-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 9px 12px;
+  border-radius: 13px;
+  background: var(--surface-inset);
+  border: 1px solid var(--glass-border);
+}
+.seen-user-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.seen-time-badge {
+  font-size: .7rem;
+  font-weight: 700;
+  color: var(--accent-cyan);
+}
+
+.toast-banner {
+  position: fixed;
+  bottom: 90px;
+  left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  z-index: 6000;
+  padding: 10px 20px;
+  border-radius: 999px;
+  background: rgba(5, 5, 16, .95);
+  border: 1px solid var(--accent-cyan);
+  color: #fff;
+  font-size: .82rem;
+  font-weight: 700;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, .55);
+  opacity: 0;
+  pointer-events: none;
+  transition: all .3s ease;
+}
+.toast-banner.show {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}
+</style>
+</head>
+<body>
+
+<div id="global-loader" class="glass-loader">
+  <div class="loader-spinner"></div>
+  <h2 class="loader-text">Loading...</h2>
+</div>
+
+<div class="orb-container">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+</div>
+
+<!-- App Navigation -->
+<nav class="app-nav">
+  <a href="dashboard" class="nav-brand">
+    <img src="resources/images/logo.png" alt="NoFap Logo">
+    <span>NoFap</span>
+  </a>
+  <div class="nav-links">
+    <a href="dashboard" class="nav-item">
+      <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <span>Home</span>
+    </a>
+    <a href="chats" class="nav-item active">
+      <svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+      <span>Chats</span>
+    </a>
+    <a href="games" class="nav-item">
+      <svg viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M12 12h.01M16 12h.01M8 12h.01M6 12h.01"/></svg>
+      <span>Games</span>
+    </a>
+    <a href="profile" class="nav-item">
+      <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <span>Profile</span>
+    </a>
+    <button class="nav-item" id="themeToggle" aria-label="Toggle theme"></button>
+  </div>
+</nav>
+
+<main class="chats-shell">
+
+  <!-- Top Command Bar with NoFap Logo Pill -->
+  <header class="command-bar">
+    <a href="dashboard" class="logo-header-pill">
+      <img src="resources/images/logo.png" alt="NoFap">
+      <span class="logo-pill-title">NoFap</span>
+      <span class="logo-pill-sep"></span>
+      <span class="logo-pill-sub"><i class="live-dot"></i><span>Comms &amp; Squads</span></span>
+    </a>
+
+    <div class="command-controls">
+      <button type="button" class="chip-btn" id="btn-open-new-dm">
+        <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><line x1="9" y1="10" x2="15" y2="10"/><line x1="12" y1="7" x2="12" y2="13"/></svg>
+        <span>Message @User</span>
+      </button>
+
+      <button type="button" class="chip-btn primary" id="btn-open-create-squad">
+        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+        <span>Create Squad</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Split Workspace: Left Sidebar + Right Active Chat -->
+  <section class="comms-workspace">
+
+    <!-- LEFT SIDEBAR -->
+    <aside class="sidebar-pane">
+      <div class="sidebar-top">
+        <div class="primary-tabs">
+          <button type="button" class="pri-tab-btn active" data-tab="chats" id="tab-btn-chats">
+            <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            <span>Chats</span>
+          </button>
+          <button type="button" class="pri-tab-btn" data-tab="discover" id="tab-btn-discover">
+            <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <span>Explore</span>
+          </button>
+          <button type="button" class="pri-tab-btn" data-tab="requests" id="tab-btn-requests">
+            <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            <span>Requests</span>
+            <span class="req-count-badge" id="req-badge-count">0</span>
+          </button>
+        </div>
+
+        <div class="search-box-wrap">
+          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" class="search-input" id="sidebar-search" placeholder="Search chats, squads, or @username...">
+        </div>
+
+        <div class="sub-filter-row" id="chats-subfilter-row">
+          <div class="sub-pills">
+            <button type="button" class="sub-pill active" data-sub="all">All</button>
+            <button type="button" class="sub-pill" data-sub="groups">Groups</button>
+            <button type="button" class="sub-pill" data-sub="dms">DMs</button>
+          </div>
+          <span style="font-size:.66rem;font-weight:700;color:var(--text-dim)" id="sidebar-counter-label">Live</span>
+        </div>
+      </div>
+
+      <div class="sidebar-list" id="sidebar-list"></div>
+    </aside>
+
+    <!-- RIGHT CHAT PANE -->
+    <section class="chat-pane" id="chat-pane">
+
+      <!-- Empty State -->
+      <div class="chat-empty-state" id="chat-empty-state">
+        <div class="empty-icon-circle">
+          <svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+        </div>
+        <h2 style="font-size:1.25rem;font-weight:800;color:var(--text-main)">Select a Conversation</h2>
+        <p style="max-width:340px;font-size:.86rem;line-height:1.5">Open Global Arena, your 15-member Squad, or a 1-on-1 Direct Message to share progress, photos, and PDFs.</p>
+      </div>
+
+      <!-- Active Conversation View -->
+      <div class="chat-active-view" id="chat-active-view" style="display:none">
+
+        <!-- Chat Header -->
+        <header class="chat-header">
+          <div class="chat-header-left">
+            <button type="button" class="mobile-back-btn" id="btn-mobile-back" aria-label="Back to list">
+              <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+            </button>
+            <div class="chat-header-avatar" id="active-chat-avatar" title="Click to inspect full resolution"></div>
+            <div class="chat-header-titles">
+              <div class="chat-header-name" id="active-chat-title">Conversation</div>
+              <div class="chat-header-sub" id="active-chat-sub">Active</div>
+            </div>
+          </div>
+
+          <div class="chat-header-actions">
+            <button type="button" class="icon-action-btn" id="btn-squad-invite-open" style="display:none" title="Invite warrior by @username">
+              <svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+              <span>Invite</span>
+            </button>
+
+            <button type="button" class="icon-action-btn" id="btn-chat-info-open" title="Roster &amp; Details">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+              <span>Details</span>
+            </button>
+
+            <button type="button" class="icon-action-btn danger" id="btn-leave-room" style="display:none" title="Leave Group">
+              <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+              <span id="leave-room-label">Leave</span>
+            </button>
+          </div>
+        </header>
+
+        <!-- Messages Stream -->
+        <div class="messages-stream" id="messages-stream"></div>
+
+        <!-- Instagram-Style Request Gate Bar (If viewing an incoming unaccepted DM request) -->
+        <div class="dm-request-gate-bar" id="dm-request-gate-bar">
+          <div style="font-size:.8rem;font-weight:700">
+            <span id="dm-req-gate-text">This user wants to send you a message. Accept to move to your main inbox.</span>
+          </div>
+          <div style="display:flex;gap:8px">
+            <button type="button" class="req-btn accept" id="btn-gate-accept-dm" style="padding:7px 16px">Accept Request</button>
+            <button type="button" class="req-btn decline" id="btn-gate-decline-dm" style="padding:7px 14px">Decline</button>
+          </div>
+        </div>
+
+        <!-- Staging Bar (Reply / Photo Mode / PDF Upload Progress) -->
+        <div class="composer-staging-bar" id="composer-staging-bar">
+          <!-- Reply Preview Row -->
+          <div class="stage-item-row" id="stage-reply-row" style="display:none">
+            <div class="stage-preview-left">
+              <svg viewBox="0 0 24 24" width="15" height="15" stroke="var(--accent-cyan)" fill="none" stroke-width="2.2"><polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 0 0-4-4H4"/></svg>
+              <span style="font-size:.76rem;color:var(--text-muted)">Replying to <b id="stage-reply-author" style="color:var(--accent-cyan)"></b>: <span id="stage-reply-text"></span></span>
+            </div>
+            <button type="button" class="close-x-btn" id="btn-cancel-reply" style="width:26px;height:26px">
+              <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+          </div>
+
+          <!-- Attachment Preview Row (Photo / View Once / View Twice / PDF) -->
+          <div class="stage-item-row" id="stage-att-row" style="display:none">
+            <div class="stage-preview-left">
+              <img id="stage-photo-thumb" class="stage-thumb" src="" alt="Preview" style="display:none">
+              <div class="pdf-icon-box" id="stage-pdf-icon" style="display:none;width:36px;height:36px">
+                <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              </div>
+              <div>
+                <div style="font-size:.8rem;font-weight:800" id="stage-att-name">Attachment</div>
+                <div style="font-size:.68rem;color:var(--text-muted)" id="stage-att-meta">Ready to send</div>
+              </div>
+            </div>
+
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+              <!-- Photo View Mode Selector -->
+              <div class="view-mode-pills" id="stage-photo-modes" style="display:none">
+                <button type="button" class="vmode-btn active" data-vmode="standard">Standard</button>
+                <button type="button" class="vmode-btn" data-vmode="once">1x View Once</button>
+                <button type="button" class="vmode-btn" data-vmode="twice">2x View Twice</button>
+              </div>
+
+              <button type="button" class="close-x-btn" id="btn-cancel-att" style="width:28px;height:28px">
+                <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Chunked Upload Progress Bar -->
+          <div class="upload-progress-wrap" id="upload-progress-wrap">
+            <div style="display:flex;justify-content:space-between;font-size:.69rem;font-weight:800;color:var(--accent-cyan)">
+              <span id="upload-progress-label">Uploading attachment...</span>
+              <span id="upload-progress-pct">0%</span>
+            </div>
+            <div class="upload-progress-track">
+              <div class="upload-progress-fill" id="upload-progress-fill"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Message Composer -->
+        <form class="chat-composer" id="chat-composer-form" autocomplete="off">
+          <!-- User Emoji Picker Popover (Allows users to insert emojis!) -->
+          <div class="user-emoji-popover" id="user-emoji-popover">
+            <div class="emoji-pop-head">
+              <span>Insert Emoji</span>
+              <span>User Reactions</span>
+            </div>
+            <div class="emoji-grid" id="composer-emoji-grid"></div>
+          </div>
+
+          <button type="button" class="comp-tool-btn" id="btn-toggle-emoji" title="Insert Emoji">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+          </button>
+
+          <label class="comp-tool-btn" for="att-photo-input" title="Attach Photo (Standard, View Once 1x, View Twice 2x · Max 15 MB)">
+            <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          </label>
+          <input type="file" id="att-photo-input" accept="image/*" style="display:none">
+
+          <label class="comp-tool-btn" for="att-pdf-input" title="Attach PDF Document (.pdf only · Max 15 MB)">
+            <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          </label>
+          <input type="file" id="att-pdf-input" accept="application/pdf,.pdf" style="display:none">
+
+          <input type="text" class="comp-input" id="composer-text-input" maxlength="1000" placeholder="Write a message...">
+
+          <button type="submit" class="comp-send-btn" id="btn-send-msg">
+            <span>Send</span>
+            <svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          </button>
+        </form>
+
+      </div>
+
+    </section>
+
+  </section>
+
+</main>
+
+<!-- ========================================================================
+ * MODAL 1: CREATE / EDIT SQUAD (1080x1080 AVATAR CROPPER + 15-MEMBER CAP)
+ * ======================================================================== -->
+<div class="modal-backdrop" id="squad-modal">
+  <div class="modal-sheet">
+    <div class="modal-top">
+      <h2 id="squad-modal-title">Create Accountability Squad</h2>
+      <button type="button" class="close-x-btn" id="btn-close-squad-modal">
+        <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+
+    <div class="squad-crop-box">
+      <div class="field-label-row" style="width:100%">
+        <span>Squad 1080×1080 Avatar (Max 15 MB)</span>
+        <span id="squad-webp-badge" style="color:var(--accent-cyan)">1080×1080 HD</span>
+      </div>
+      <div class="squad-crop-viewport" id="squad-crop-viewport" title="Drag to frame squad avatar">
+        <canvas id="squad-crop-canvas" width="1080" height="1080"></canvas>
+      </div>
+      <div id="squad-zoom-row" style="display:none;width:100%;max-width:220px;align-items:center;gap:8px;font-size:.72rem;font-weight:700;color:var(--text-muted)">
+        <span>Zoom</span>
+        <input type="range" id="squad-zoom-slider" min="1" max="3" step="0.02" value="1" style="flex:1;accent-color:var(--accent-cyan)">
+        <span id="squad-zoom-val">1.0×</span>
+      </div>
+      <label class="chip-btn" for="squad-avatar-input" style="cursor:pointer">
+        <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        <span>Upload 1080×1080 Photo</span>
+      </label>
+      <input type="file" id="squad-avatar-input" accept="image/*" style="display:none">
+    </div>
+
+    <div class="field-block">
+      <div class="field-label-row">
+        <label for="inp-squad-name">Squad Name</label>
+        <span>Max 15 Members</span>
+      </div>
+      <input type="text" id="inp-squad-name" class="field-input" maxlength="28" placeholder="e.g. Spartan 365">
+    </div>
+
+    <div class="field-block">
+      <div class="field-label-row">
+        <label for="inp-squad-motto">Squad Mission / Rules</label>
+        <span>Public Description</span>
+      </div>
+      <textarea id="inp-squad-motto" class="field-textarea" maxlength="160" placeholder="Daily check-ins required. Zero excuses."></textarea>
+    </div>
+
+    <div class="field-block">
+      <div class="field-label-row">
+        <span>Join Mode</span>
+        <span>Instagram-Style Requests</span>
+      </div>
+      <select id="inp-squad-privacy" class="field-input">
+        <option value="approval">Approval Required (Requests go to Leader's Requests Box)</option>
+        <option value="open">Open Join (Anyone can join until 15/15 full)</option>
+      </select>
+    </div>
+
+    <button type="button" class="btn-primary-full" id="btn-submit-squad">Forge Squad (Max 15 Members)</button>
+  </div>
+</div>
+
+<!-- ========================================================================
+ * MODAL 2: MESSAGE OR INVITE BY @USERNAME
+ * ======================================================================== -->
+<div class="modal-backdrop" id="user-lookup-modal">
+  <div class="modal-sheet" style="max-width:420px">
+    <div class="modal-top">
+      <h2 id="lookup-modal-title">Connect via @Username</h2>
+      <button type="button" class="close-x-btn" id="btn-close-lookup-modal">
+        <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <p style="font-size:.82rem;color:var(--text-muted);line-height:1.45" id="lookup-modal-desc">
+      Enter a warrior's @username. Messaging someone new places the thread in their Requests inbox until accepted.
+    </p>
+    <div class="field-block">
+      <div class="field-label-row">
+        <label for="inp-target-username">Warrior @Username</label>
+      </div>
+      <input type="text" id="inp-target-username" class="field-input" maxlength="20" placeholder="e.g. shadowmonk">
+    </div>
+    <div class="field-block" id="lookup-squad-picker-block" style="display:none">
+      <div class="field-label-row">
+        <label for="inp-invite-squad-select">Select Squad to Invite To</label>
+      </div>
+      <select id="inp-invite-squad-select" class="field-input"></select>
+    </div>
+    <button type="button" class="btn-primary-full" id="btn-confirm-lookup">Continue</button>
+  </div>
+</div>
+
+<!-- ========================================================================
+ * MODAL 3: SENDER-ONLY "SEEN BY" POPUP CARD (GROUP CHATS)
+ * ======================================================================== -->
+<div class="modal-backdrop" id="seen-by-modal">
+  <div class="modal-sheet" style="max-width:400px">
+    <div class="modal-top">
+      <h2>Seen By</h2>
+      <button type="button" class="close-x-btn" id="btn-close-seen-modal">
+        <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <p style="font-size:.76rem;color:var(--text-muted)">Visible only to you as the sender of this message.</p>
+    <div class="seen-by-list" id="seen-by-list"></div>
+  </div>
+</div>
+
+<!-- ========================================================================
+ * MODAL 4: ROOM DETAILS, ROSTER & PERMANENT GLOBAL ARENA LEAVE
+ * ======================================================================== -->
+<div class="modal-backdrop" id="room-info-modal">
+  <div class="modal-sheet" style="max-width:460px">
+    <div class="modal-top">
+      <h2 id="info-modal-title">Group Details</h2>
+      <button type="button" class="close-x-btn" id="btn-close-info-modal">
+        <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div id="info-modal-body" style="display:flex;flex-direction:column;gap:12px"></div>
+  </div>
+</div>
+
+<!-- ========================================================================
+ * MODAL 5: SECURE MEDIA & PDF VIEWER (1080x1080 / VIEW ONCE / VIEW TWICE / PDF)
+ * ======================================================================== -->
+<div class="modal-backdrop" id="media-viewer-modal">
+  <div class="modal-sheet" style="max-width:740px;align-items:center">
+    <div class="modal-top" style="width:100%">
+      <span class="row-badge" id="viewer-badge-label">Media Viewer</span>
+      <div style="display:flex;gap:8px;align-items:center">
+        <a id="viewer-download-btn" href="#" download class="chip-btn" style="display:none">
+          <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          <span>Download</span>
+        </a>
+        <button type="button" class="close-x-btn" id="btn-close-viewer-modal">
+          <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+    </div>
+    <div id="viewer-stage-box" style="width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:260px"></div>
+  </div>
+</div>
+
+<!-- ========================================================================
+ * MODAL 6: CONFIRM LEAVE (GLOBAL ARENA PERMANENT WARNING OR SQUAD LEAVE)
+ * ======================================================================== -->
+<div class="modal-backdrop" id="leave-confirm-modal">
+  <div class="modal-sheet" style="max-width:400px;text-align:center;align-items:center">
+    <h2 id="leave-modal-heading" style="font-size:1.22rem;font-weight:800">Leave Group?</h2>
+    <p id="leave-modal-desc" style="font-size:.86rem;color:var(--text-muted);line-height:1.5"></p>
+    <div style="display:flex;gap:10px;width:100%">
+      <button type="button" class="chip-btn" id="btn-cancel-leave" style="flex:1;justify-content:center;padding:12px">Cancel</button>
+      <button type="button" class="btn-primary-full" id="btn-confirm-leave" style="flex:1;background:linear-gradient(135deg,#ef4444,#b91c1c);color:#fff">Leave</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-banner" id="toast-banner">Ready</div>
+
+<script type="module">
+import { auth, db, $, hideLoader, dateStr, initTheme } from "./shared.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+import {
+  doc, getDoc, setDoc, updateDoc, deleteDoc, addDoc, collection, getDocs,
+  query, where, orderBy, limit, onSnapshot, serverTimestamp, arrayUnion, arrayRemove
+} from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+initTheme($('themeToggle'));
+
+const MAX_ATTACHMENT_BYTES = 15 * 1024 * 1024; // 15 MB limit for Photos & PDFs
+const CHUNK_CHAR_SIZE = 700000; // ~700 KB per Firestore chunk document (safely below 1 MiB cap)
+const MAX_SQUAD_MEMBERS = 15;
+
+// User-facing reaction & composer emojis (Users have full emoji support!)
+const QUICK_REACTIONS = ["🔥", "💪", "👑", "⚡", "🫡", "❤️", "😂", "🎯"];
+const COMPOSER_EMOJIS = [
+  "🔥", "💪", "👑", "⚡", "🫡", "🛡️", "🎯",
+  "❤️", "💯", "🚀", "🙌", "👏", "🤝", "🙏",
+  "😂", "😎", "😤", "🗿", "🦁", "🦅", "⚔️",
+  "✅", "🏆", "📈", "💎", "🌅", "🧠", "⏳"
+];
+
+function showToast(msg, ms = 2600) {
+  const el = $('toast-banner');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(el._tid);
+  el._tid = setTimeout(() => el.classList.remove('show'), ms);
+}
+
+function escapeHtml(s = "") {
+  return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+function formatShortTime(ts) {
+  if (!ts) return "";
+  const d = ts.toDate ? ts.toDate() : new Date(ts);
+  if (isNaN(d)) return "";
+  const now = new Date();
+  const sameDay = d.toDateString() === now.toDateString();
+  return sameDay
+    ? d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    : d.toLocaleDateString([], { month: 'short', day: 'numeric' });
+}
+
+function effectiveStreak(u) {
+  if (!u || !u.lastLogDate) return 0;
+  const t = dateStr(), y = dateStr(new Date(Date.now() - 864e5));
+  if (u.lastLogStatus === 'failed' && u.lastLogDate === t) return 0;
+  return (u.lastLogDate === t || u.lastLogDate === y) ? Number(u.currentStreak || 0) : 0;
+}
+
+/* ============================================================================
+ * STATE
+ * ============================================================================ */
+let currentUser = null;
+let currentUid = null;
+let myProfile = null;
+
+let activePrimaryTab = "chats"; // 'chats' | 'discover' | 'requests'
+let activeSubFilter = "all";    // 'all' | 'groups' | 'dms'
+let searchQuery = "";
+
+let mySquads = [];
+let discoverSquads = [];
+let discoverUsers = [];
+let myDMs = [];
+let incomingRequests = []; // Squad invites + Squad join requests (if leader) + pending DMs
+
+let activeRoom = null; // { type: 'global' | 'squad' | 'dm', id: string, data: object }
+let unsubscribeMessages = null;
+let currentMessages = [];
+
+let replyingTo = null; // { id, senderName, text }
+let stagedAttachment = null; // { kind: 'photo' | 'pdf', viewMode: 'standard' | 'once' | 'twice', fileName, fileSize, mimeType, base64Data, previewUrl }
+
+/* ============================================================================
+ * POPULATE USER EMOJI PICKER IN COMPOSER
+ * ============================================================================ */
+const emojiGrid = $('composer-emoji-grid');
+emojiGrid.innerHTML = COMPOSER_EMOJIS.map(em => `<button type="button" class="emoji-cell-btn" data-em="${em}">${em}</button>`).join('');
+emojiGrid.addEventListener('click', e => {
+  const btn = e.target.closest('.emoji-cell-btn');
+  if (!btn) return;
+  const inp = $('composer-text-input');
+  inp.value += btn.dataset.em;
+  inp.focus();
+});
+
+$('btn-toggle-emoji').addEventListener('click', e => {
+  e.stopPropagation();
+  $('user-emoji-popover').classList.toggle('open');
+});
+document.addEventListener('click', e => {
+  if (!e.target.closest('#user-emoji-popover') && !e.target.closest('#btn-toggle-emoji')) {
+    $('user-emoji-popover').classList.remove('open');
+  }
+  if (!e.target.closest('.reaction-popover') && !e.target.closest('.quick-react-trigger')) {
+    document.querySelectorAll('.reaction-popover.open').forEach(el => el.classList.remove('open'));
+  }
+});
+
+/* ============================================================================
+ * 1080x1080 SQUAD AVATAR CROPPER STUDIO (UP TO 15 MB)
+ * ============================================================================ */
+const SQ_DIM = 1080;
+const sqCanvas = $('squad-crop-canvas');
+const sqCtx = sqCanvas.getContext('2d');
+let sqCropImg = new Image();
+let sqHasCustom = false;
+let sqZoom = 1, sqPanX = 0, sqPanY = 0, sqDragging = false, sqStartX = 0, sqStartY = 0;
+let stagedSquadAvatarUrl = "";
+
+function drawSquadMonogram(name = "S") {
+  sqHasCustom = false;
+  $('squad-zoom-row').style.display = 'none';
+  sqCtx.clearRect(0, 0, SQ_DIM, SQ_DIM);
+  const g = sqCtx.createLinearGradient(0, 0, SQ_DIM, SQ_DIM);
+  g.addColorStop(0, "#0b2347");
+  g.addColorStop(1, "#0066ff");
+  sqCtx.fillStyle = g;
+  sqCtx.fillRect(0, 0, SQ_DIM, SQ_DIM);
+  sqCtx.fillStyle = "#00f0ff";
+  sqCtx.font = "800 440px 'Plus Jakarta Sans', sans-serif";
+  sqCtx.textAlign = "center";
+  sqCtx.textBaseline = "middle";
+  sqCtx.fillText((name.trim() || "S").charAt(0).toUpperCase(), SQ_DIM / 2, SQ_DIM / 2 + 20);
+  stagedSquadAvatarUrl = "";
+}
+drawSquadMonogram("S");
+
+function renderSquadCropCanvas() {
+  if (!sqHasCustom || !sqCropImg.complete || !sqCropImg.naturalWidth) return;
+  $('squad-zoom-row').style.display = 'flex';
+  sqCtx.clearRect(0, 0, SQ_DIM, SQ_DIM);
+  sqCtx.imageSmoothingEnabled = true;
+  sqCtx.imageSmoothingQuality = 'high';
+
+  const iw = sqCropImg.naturalWidth, ih = sqCropImg.naturalHeight;
+  const scale = Math.max(SQ_DIM / iw, SQ_DIM / ih) * sqZoom;
+  const dw = iw * scale, dh = ih * scale;
+  const maxX = Math.max(0, (dw - SQ_DIM) / 2);
+  const maxY = Math.max(0, (dh - SQ_DIM) / 2);
+  sqPanX = Math.max(-maxX, Math.min(maxX, sqPanX));
+  sqPanY = Math.max(-maxY, Math.min(maxY, sqPanY));
+
+  sqCtx.drawImage(sqCropImg, (SQ_DIM - dw) / 2 + sqPanX, (SQ_DIM - dh) / 2 + sqPanY, dw, dh);
+
+  const qualities = [0.92, 0.86, 0.80, 0.72, 0.64];
+  for (const q of qualities) {
+    const url = sqCanvas.toDataURL('image/webp', q);
+    stagedSquadAvatarUrl = url;
+    if (url.length <= 800000) break;
+  }
+  const kb = Math.round((stagedSquadAvatarUrl.length * 3 / 4) / 1024);
+  $('squad-webp-badge').textContent = `1080×1080 · ${kb} KB`;
+}
+
+const sqVp = $('squad-crop-viewport');
+sqVp.addEventListener('pointerdown', e => {
+  if (!sqHasCustom) return;
+  sqDragging = true;
+  sqStartX = e.clientX - sqPanX / 4.5;
+  sqStartY = e.clientY - sqPanY / 4.5;
+  sqVp.setPointerCapture(e.pointerId);
+});
+sqVp.addEventListener('pointermove', e => {
+  if (!sqDragging) return;
+  sqPanX = (e.clientX - sqStartX) * 4.5;
+  sqPanY = (e.clientY - sqStartY) * 4.5;
+  renderSquadCropCanvas();
+});
+sqVp.addEventListener('pointerup', () => { sqDragging = false; });
+sqVp.addEventListener('pointercancel', () => { sqDragging = false; });
+
+$('squad-zoom-slider').addEventListener('input', e => {
+  sqZoom = parseFloat(e.target.value) || 1;
+  $('squad-zoom-val').textContent = sqZoom.toFixed(1) + "×";
+  renderSquadCropCanvas();
+});
+
+$('squad-avatar-input').addEventListener('change', e => {
+  const file = e.target.files?.[0];
+  if (!file) return;
+  if (file.size > MAX_ATTACHMENT_BYTES) {
+    showToast("File exceeds the 15 MB maximum limit.", 3200);
+    e.target.value = "";
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const im = new Image();
+    im.onload = () => {
+      sqCropImg = im;
+      sqHasCustom = true;
+      sqZoom = 1; sqPanX = 0; sqPanY = 0;
+      $('squad-zoom-slider').value = "1";
+      $('squad-zoom-val').textContent = "1.0×";
+      renderSquadCropCanvas();
+    };
+    im.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+});
+
+$('inp-squad-name').addEventListener('input', e => {
+  if (!sqHasCustom) drawSquadMonogram(e.target.value || "S");
+});
+
+/* ============================================================================
+ * 15 MB CHUNKED MEDIA VAULT (UPLOAD & REASSEMBLE PHOTOS + PDFS)
+ * ============================================================================ */
+async function uploadToMediaVault({ kind, viewMode, fileName, fileSize, mimeType, base64Data }) {
+  const wrap = $('upload-progress-wrap');
+  const lbl = $('upload-progress-label');
+  const pctEl = $('upload-progress-pct');
+  const fillEl = $('upload-progress-fill');
+
+  wrap.classList.add('show');
+  lbl.textContent = `Uploading ${kind === 'pdf' ? 'PDF' : 'Photo'}...`;
+  pctEl.textContent = "0%";
+  fillEl.style.width = "0%";
+
+  const totalChars = base64Data.length;
+  const chunkCount = Math.ceil(totalChars / CHUNK_CHAR_SIZE) || 1;
+
+  const vaultRef = doc(collection(db, "mediaVault"));
+  await setDoc(vaultRef, {
+    ownerUid: currentUid,
+    kind,
+    viewMode: viewMode || "standard",
+    maxViews: viewMode === "once" ? 1 : (viewMode === "twice" ? 2 : 0),
+    fileName: fileName || (kind === "pdf" ? "document.pdf" : "photo.webp"),
+    fileSize: Number(fileSize || 0),
+    mimeType: mimeType || (kind === "pdf" ? "application/pdf" : "image/webp"),
+    chunkCount,
+    viewsBy: {},
+    createdAt: serverTimestamp()
+  });
+
+  for (let i = 0; i < chunkCount; i++) {
+    const slice = base64Data.slice(i * CHUNK_CHAR_SIZE, (i + 1) * CHUNK_CHAR_SIZE);
+    await setDoc(doc(db, "mediaVault", vaultRef.id, "chunks", String(i)), {
+      index: i,
+      data: slice
+    });
+    const pct = Math.round(((i + 1) / chunkCount) * 100);
+    pctEl.textContent = `${pct}%`;
+    fillEl.style.width = `${pct}%`;
+  }
+
+  setTimeout(() => wrap.classList.remove('show'), 350);
+  return {
+    mediaId: vaultRef.id,
+    kind,
+    viewMode: viewMode || "standard",
+    maxViews: viewMode === "once" ? 1 : (viewMode === "twice" ? 2 : 0),
+    fileName: fileName || (kind === "pdf" ? "document.pdf" : "photo.webp"),
+    fileSize: Number(fileSize || 0),
+    mimeType: mimeType || (kind === "pdf" ? "application/pdf" : "image/webp"),
+    chunkCount
+  };
+}
+
+const mediaCache = new Map();
+
+async function downloadFromMediaVault(mediaId, onProgress) {
+  if (mediaCache.has(mediaId)) return mediaCache.get(mediaId);
+  const metaSnap = await getDoc(doc(db, "mediaVault", mediaId));
+  if (!metaSnap.exists()) throw new Error("Media no longer exists.");
+  const meta = metaSnap.data();
+  const chunkCount = Number(meta.chunkCount || 1);
+  const parts = new Array(chunkCount);
+
+  for (let i = 0; i < chunkCount; i++) {
+    const cSnap = await getDoc(doc(db, "mediaVault", mediaId, "chunks", String(i)));
+    if (!cSnap.exists()) throw new Error("Media payload expired or was removed.");
+    parts[i] = cSnap.data().data || "";
+    if (onProgress) onProgress(Math.round(((i + 1) / chunkCount) * 100));
+  }
+
+  const fullBase64 = parts.join("");
+  const result = { meta, fullBase64 };
+  if (meta.viewMode === "standard" || meta.kind === "pdf") {
+    mediaCache.set(mediaId, result);
+  }
+  return result;
+}
+
+/* ============================================================================
+ * ATTACHMENT STAGING (PHOTOS: STANDARD / 1x / 2x + PDF DOCUMENTS UP TO 15 MB)
+ * ============================================================================ */
+function updateStagingBarUI() {
+  const bar = $('composer-staging-bar');
+  const repRow = $('stage-reply-row');
+  const attRow = $('stage-att-row');
+
+  if (!replyingTo && !stagedAttachment) {
+    bar.classList.remove('show');
+    repRow.style.display = 'none';
+    attRow.style.display = 'none';
+    return;
+  }
+
+  bar.classList.add('show');
+
+  if (replyingTo) {
+    repRow.style.display = 'flex';
+    $('stage-reply-author').textContent = replyingTo.senderName;
+    $('stage-reply-text').textContent = replyingTo.text.slice(0, 70);
+  } else {
+    repRow.style.display = 'none';
+  }
+
+  if (stagedAttachment) {
+    attRow.style.display = 'flex';
+    $('stage-att-name').textContent = stagedAttachment.fileName;
+    const mb = (stagedAttachment.fileSize / (1024 * 1024)).toFixed(2);
+    $('stage-att-meta').textContent = `${mb} MB · ${stagedAttachment.kind === 'pdf' ? 'PDF Document' : `Photo (${stagedAttachment.viewMode.toUpperCase()})`}`;
+
+    if (stagedAttachment.kind === 'photo') {
+      $('stage-photo-thumb').src = stagedAttachment.previewUrl;
+      $('stage-photo-thumb').style.display = 'block';
+      $('stage-pdf-icon').style.display = 'none';
+      $('stage-photo-modes').style.display = 'inline-flex';
+    } else {
+      $('stage-photo-thumb').style.display = 'none';
+      $('stage-pdf-icon').style.display = 'flex';
+      $('stage-photo-modes').style.display = 'none';
+    }
+  } else {
+    attRow.style.display = 'none';
+  }
+}
+
+$('btn-cancel-reply').addEventListener('click', () => {
+  replyingTo = null;
+  updateStagingBarUI();
+});
+
+$('btn-cancel-att').addEventListener('click', () => {
+  stagedAttachment = null;
+  $('att-photo-input').value = "";
+  $('att-pdf-input').value = "";
+  updateStagingBarUI();
+});
+
+document.querySelectorAll('#stage-photo-modes .vmode-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('#stage-photo-modes .vmode-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    if (stagedAttachment && stagedAttachment.kind === 'photo') {
+      stagedAttachment.viewMode = btn.dataset.vmode;
+      updateStagingBarUI();
+    }
+  });
+});
+
+// Stage Photo (Compresses to crisp 1440px WebP while supporting up to 15 MB input)
+$('att-photo-input').addEventListener('change', e => {
+  const file = e.target.files?.[0];
+  if (!file) return;
+  if (file.size > MAX_ATTACHMENT_BYTES) {
+    showToast("Photo exceeds the 15 MB limit.", 3200);
+    e.target.value = "";
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const im = new Image();
+    im.onload = () => {
+      const maxDim = 1440;
+      let w = im.naturalWidth, h = im.naturalHeight;
+      if (w > maxDim || h > maxDim) {
+        if (w >= h) { h = Math.round(h * (maxDim / w)); w = maxDim; }
+        else { w = Math.round(w * (maxDim / h)); h = maxDim; }
+      }
+      const c = document.createElement('canvas');
+      c.width = w; c.height = h;
+      const ctx = c.getContext('2d');
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
+      ctx.drawImage(im, 0, 0, w, h);
+      const dataUrl = c.toDataURL('image/webp', 0.88);
+      const b64 = dataUrl.split(',')[1] || "";
+
+      // Create a tiny blurred thumbnail for inline preview on standard photos
+      const tc = document.createElement('canvas');
+      tc.width = 360; tc.height = Math.max(180, Math.round(360 * (h / w)));
+      tc.getContext('2d').drawImage(im, 0, 0, tc.width, tc.height);
+      const thumbDataUrl = tc.toDataURL('image/webp', 0.72);
+
+      document.querySelectorAll('#stage-photo-modes .vmode-btn').forEach(b => b.classList.toggle('active', b.dataset.vmode === 'standard'));
+      stagedAttachment = {
+        kind: 'photo',
+        viewMode: 'standard',
+        fileName: file.name,
+        fileSize: file.size,
+        mimeType: 'image/webp',
+        base64Data: b64,
+        previewUrl: dataUrl,
+        inlineThumb: thumbDataUrl
+      };
+      updateStagingBarUI();
+    };
+    im.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+});
+
+// Stage PDF Document (.pdf only, up to 15 MB)
+$('att-pdf-input').addEventListener('change', e => {
+  const file = e.target.files?.[0];
+  if (!file) return;
+  const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
+  if (!isPdf) {
+    showToast("Only PDF documents (.pdf) are allowed.", 3200);
+    e.target.value = "";
+    return;
+  }
+  if (file.size > MAX_ATTACHMENT_BYTES) {
+    showToast("PDF exceeds the 15 MB maximum size limit.", 3200);
+    e.target.value = "";
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const dataUrl = String(ev.target.result || "");
+    const b64 = dataUrl.split(',')[1] || "";
+    stagedAttachment = {
+      kind: 'pdf',
+      viewMode: 'standard',
+      fileName: file.name,
+      fileSize: file.size,
+      mimeType: 'application/pdf',
+      base64Data: b64,
+      previewUrl: ""
+    };
+    updateStagingBarUI();
+  };
+  reader.readAsDataURL(file);
+});
+
+/* ============================================================================
+ * AUTH & DATA LOADING (SQUADS, DMS, REQUESTS, GLOBAL ARENA)
+ * ============================================================================ */
+onAuthStateChanged(auth, async user => {
+  if (!user) {
+    location.replace("index.html");
+    return;
+  }
+  currentUser = user;
+  currentUid = user.uid;
+
+  try {
+    const uSnap = await getDoc(doc(db, "users", currentUid));
+    if (!uSnap.exists() || !uSnap.data().nickname) {
+      location.replace("onboarding.html");
+      return;
+    }
+    myProfile = uSnap.data();
+
+    await refreshAllLists();
+    handleUrlActionParams();
+    hideLoader();
+  } catch (err) {
+    console.error("Chats init error:", err);
+    hideLoader();
+  }
+});
+
+async function refreshAllLists() {
+  if (!currentUid) return;
+
+  // 1. Load Squads
+  try {
+    const sqSnap = await getDocs(collection(db, "squads"));
+    const allSq = sqSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+    mySquads = allSq.filter(s => Array.isArray(s.memberUids) && s.memberUids.includes(currentUid));
+    discoverSquads = allSq.filter(s => !Array.isArray(s.memberUids) || !s.memberUids.includes(currentUid));
+  } catch (e) {
+    console.warn("Squads fetch:", e);
+  }
+
+  // 2. Load DMs involving current user
+  try {
+    const dmSnap = await getDocs(query(collection(db, "dms"), where("participants", "array-contains", currentUid)));
+    myDMs = dmSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+  } catch (e) {
+    console.warn("DMs fetch:", e);
+  }
+
+  // 3. Load Squad Requests / Invites
+  let rawReqs = [];
+  try {
+    const rSnap = await getDocs(collection(db, "squadRequests"));
+    rawReqs = rSnap.docs.map(d => ({ id: d.id, ...d.data() })).filter(r => r.status === 'pending');
+  } catch (e) {
+    console.warn("Requests fetch:", e);
+  }
+
+  const myLedSquadIds = new Set(mySquads.filter(s => s.leaderUid === currentUid).map(s => s.id));
+
+  // Filter incoming requests relevant to current user:
+  // a) Incoming DM requests where status === 'requested' and initiatorUid !== currentUid
+  const pendingDmReqs = myDMs.filter(dm => dm.status === 'requested' && dm.initiatorUid !== currentUid).map(dm => ({
+    reqKind: 'dm_request',
+    id: dm.id,
+    dm
+  }));
+
+  // b) Direct squad invites where targetUid === currentUid
+  const squadInvites = rawReqs.filter(r => r.type === 'invite' && r.targetUid === currentUid).map(r => ({
+    reqKind: 'squad_invite',
+    ...r
+  }));
+
+  // c) Squad join requests where user is Leader of that squad
+  const squadJoinReqs = rawReqs.filter(r => r.type === 'join_request' && myLedSquadIds.has(r.squadId)).map(r => ({
+    reqKind: 'squad_join',
+    ...r
+  }));
+
+  incomingRequests = [...pendingDmReqs, ...squadInvites, ...squadJoinReqs];
+
+  // Update badge count
+  const badge = $('req-badge-count');
+  if (incomingRequests.length > 0) {
+    badge.textContent = String(incomingRequests.length);
+    badge.classList.add('show');
+  } else {
+    badge.classList.remove('show');
+  }
+
+  // 4. Load Public Profiles for Explore
+  try {
+    const pSnap = await getDocs(query(collection(db, "publicProfiles"), limit(40)));
+    discoverUsers = pSnap.docs.map(d => ({ uid: d.id, ...d.data() })).filter(p => p.uid !== currentUid);
+  } catch (e) {
+    console.warn("Public profiles fetch:", e);
+  }
+
+  renderSidebar();
+
+  // Auto-select Global Arena on desktop if no room is open yet and user hasn't left it
+  if (!activeRoom && window.innerWidth > 768 && !myProfile?.leftGlobalArena) {
+    openConversation({
+      type: 'global',
+      id: 'main',
+      data: {
+        name: 'Global Arena',
+        motto: 'Worldwide brotherhood group chat · Leave anytime (permanent)'
+      }
+    });
+  }
+}
+
+function handleUrlActionParams() {
+  const params = new URLSearchParams(location.search);
+  const dmUser = params.get('dm');
+  const inviteUser = params.get('invite');
+  if (dmUser) {
+    startOrOpenDMByUsername(dmUser);
+    history.replaceState({}, '', 'chats');
+  } else if (inviteUser) {
+    openUserLookupModal('invite', inviteUser);
+    history.replaceState({}, '', 'chats');
+  }
+}
+
+/* ============================================================================
+ * SIDEBAR RENDERING (CHATS / EXPLORE / INSTAGRAM-STYLE REQUESTS)
+ * ============================================================================ */
+function renderSidebar() {
+  const listEl = $('sidebar-list');
+  const q = searchQuery.toLowerCase().trim();
+
+  $('chats-subfilter-row').style.display = activePrimaryTab === 'chats' ? 'flex' : 'none';
+
+  if (activePrimaryTab === 'chats') {
+    const items = [];
+
+    // 1. Global Arena (Displayed as a Group Chat unless user permanently left it!)
+    if (!myProfile?.leftGlobalArena && (activeSubFilter === 'all' || activeSubFilter === 'groups')) {
+      if (!q || 'global arena'.includes(q)) {
+        items.push({
+          type: 'global',
+          id: 'main',
+          title: 'Global Arena',
+          badge: 'GLOBAL',
+          sub: 'Worldwide group chat · Permanent leave if exited',
+          avatarHtml: `<div class="row-avatar arena-shape"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></div>`,
+          raw: { name: 'Global Arena', motto: 'Worldwide brotherhood group chat · Leave anytime (permanent)' }
+        });
+      }
+    }
+
+    // 2. User's Squads
+    if (activeSubFilter === 'all' || activeSubFilter === 'groups') {
+      mySquads.forEach(sq => {
+        const name = sq.name || 'Squad';
+        if (q && !name.toLowerCase().includes(q)) return;
+        const count = Array.isArray(sq.memberUids) ? sq.memberUids.length : 1;
+        const av = sq.avatar
+          ? `<div class="row-avatar squad-shape"><img src="${escapeHtml(sq.avatar)}" alt=""></div>`
+          : `<div class="row-avatar squad-shape">${escapeHtml(name.charAt(0).toUpperCase())}</div>`;
+        items.push({
+          type: 'squad',
+          id: sq.id,
+          title: name,
+          badge: `${count}/${MAX_SQUAD_MEMBERS}`,
+          sub: sq.lastMessageText || sq.motto || 'Accountability Squad',
+          time: formatShortTime(sq.lastMessageAt),
+          avatarHtml: av,
+          raw: sq
+        });
+      });
+    }
+
+    // 3. Accepted DMs (or DMs initiated by current user)
+    if (activeSubFilter === 'all' || activeSubFilter === 'dms') {
+      myDMs
+        .filter(dm => dm.status === 'accepted' || dm.initiatorUid === currentUid)
+        .forEach(dm => {
+          const otherUid = (dm.participants || []).find(u => u !== currentUid) || currentUid;
+          const meta = (dm.participantMeta && dm.participantMeta[otherUid]) || {};
+          const nick = meta.nickname || 'Warrior';
+          const uname = meta.username ? `@${meta.username}` : '';
+          if (q && !nick.toLowerCase().includes(q) && !uname.toLowerCase().includes(q)) return;
+
+          const av = meta.avatar
+            ? `<div class="row-avatar"><img src="${escapeHtml(meta.avatar)}" alt=""></div>`
+            : `<div class="row-avatar">${escapeHtml(nick.charAt(0).toUpperCase())}</div>`;
+          items.push({
+            type: 'dm',
+            id: dm.id,
+            title: nick,
+            badge: dm.status === 'requested' ? 'Pending' : (uname || 'DM'),
+            sub: dm.lastMessageText || 'Direct Message',
+            time: formatShortTime(dm.lastMessageAt),
+            avatarHtml: av,
+            raw: dm
+          });
+        });
+    }
+
+    $('sidebar-counter-label').textContent = `${items.length} Active`;
+
+    if (!items.length) {
+      listEl.innerHTML = `
+        <div style="text-align:center;padding:34px 16px;color:var(--text-muted);font-size:.82rem;line-height:1.5">
+          No conversations match your filter. Create a 15-member Squad or message a warrior via @username!
+        </div>
+      `;
+      return;
+    }
+
+    listEl.innerHTML = items.map(it => {
+      const isAct = activeRoom && activeRoom.type === it.type && activeRoom.id === it.id;
+      return `
+        <button type="button" class="chat-row-item ${isAct ? 'active' : ''}" data-rtype="${it.type}" data-rid="${escapeHtml(it.id)}">
+          ${it.avatarHtml}
+          <div class="row-body">
+            <div class="row-top">
+              <div class="row-title">
+                <span>${escapeHtml(it.title)}</span>
+                <span class="row-badge">${escapeHtml(it.badge)}</span>
+              </div>
+              <span class="row-time">${escapeHtml(it.time || '')}</span>
+            </div>
+            <div class="row-sub">${escapeHtml(it.sub)}</div>
+          </div>
+        </button>
+      `;
+    }).join('');
+
+    listEl.querySelectorAll('.chat-row-item').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const t = btn.dataset.rtype;
+        const id = btn.dataset.rid;
+        const found = items.find(x => x.type === t && x.id === id);
+        if (found) openConversation({ type: found.type, id: found.id, data: found.raw });
+      });
+    });
+    return;
+  }
+
+  if (activePrimaryTab === 'discover') {
+    const sqHtml = discoverSquads
+      .filter(s => !q || (s.name || '').toLowerCase().includes(q) || (s.motto || '').toLowerCase().includes(q))
+      .map(s => {
+        const count = Array.isArray(s.memberUids) ? s.memberUids.length : 1;
+        const full = count >= MAX_SQUAD_MEMBERS;
+        const isOpen = s.privacy === 'open';
+        const av = s.avatar
+          ? `<div class="row-avatar squad-shape"><img src="${escapeHtml(s.avatar)}" alt=""></div>`
+          : `<div class="row-avatar squad-shape">${escapeHtml((s.name || 'S').charAt(0).toUpperCase())}</div>`;
+        return `
+          <div class="request-card">
+            <div class="req-head">
+              ${av}
+              <div style="flex:1;min-width:0">
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:6px">
+                  <b style="font-size:.88rem">${escapeHtml(s.name || 'Squad')}</b>
+                  <span class="row-badge">${count}/${MAX_SQUAD_MEMBERS}</span>
+                </div>
+                <div style="font-size:.74rem;color:var(--text-muted);margin-top:2px">${escapeHtml(s.motto || 'Accountability Squad')}</div>
+              </div>
+            </div>
+            <div class="req-actions">
+              <button type="button" class="req-btn accept btn-join-squad" data-sid="${escapeHtml(s.id)}" ${full ? 'disabled' : ''}>
+                ${full ? 'Squad Full (15/15)' : (isOpen ? 'Join Squad' : 'Request to Join')}
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+    const usrHtml = discoverUsers
+      .filter(u => !q || (u.nickname || '').toLowerCase().includes(q) || (u.username || '').toLowerCase().includes(q))
+      .slice(0, 20)
+      .map(u => {
+        const s = effectiveStreak(u);
+        const av = u.avatar
+          ? `<div class="row-avatar"><img src="${escapeHtml(u.avatar)}" alt=""></div>`
+          : `<div class="row-avatar">${escapeHtml((u.nickname || 'W').charAt(0).toUpperCase())}</div>`;
+        return `
+          <div class="request-card">
+            <div class="req-head">
+              ${av}
+              <div style="flex:1;min-width:0">
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:6px">
+                  <b style="font-size:.86rem">${escapeHtml(u.nickname || 'Warrior')}</b>
+                  <span class="row-badge">${s}d Clean</span>
+                </div>
+                <div style="font-size:.73rem;color:var(--accent-cyan)">@${escapeHtml(u.username || 'warrior')}</div>
+              </div>
+            </div>
+            <div class="req-actions">
+              <button type="button" class="req-btn accept btn-dm-user" data-uname="${escapeHtml(u.username || '')}" data-uid="${escapeHtml(u.uid)}">Message</button>
+              <button type="button" class="req-btn btn-invite-user" data-uname="${escapeHtml(u.username || '')}">Invite to Squad</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+    listEl.innerHTML = `
+      <div style="font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);padding:4px 4px 2px">Discover Squads (Max 15)</div>
+      ${sqHtml || `<div style="padding:12px;font-size:.78rem;color:var(--text-dim)">No unjoined squads yet. Create one above!</div>`}
+      <div style="font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);padding:12px 4px 2px">Warriors Directory</div>
+      ${usrHtml || `<div style="padding:12px;font-size:.78rem;color:var(--text-dim)">No matching warriors found.</div>`}
+    `;
+
+    listEl.querySelectorAll('.btn-join-squad').forEach(btn => {
+      btn.addEventListener('click', () => handleJoinOrRequestSquad(btn.dataset.sid));
+    });
+    listEl.querySelectorAll('.btn-dm-user').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (btn.dataset.uname) startOrOpenDMByUsername(btn.dataset.uname);
+      });
+    });
+    listEl.querySelectorAll('.btn-invite-user').forEach(btn => {
+      btn.addEventListener('click', () => openUserLookupModal('invite', btn.dataset.uname));
+    });
+    return;
+  }
+
+  if (activePrimaryTab === 'requests') {
+    if (!incomingRequests.length) {
+      listEl.innerHTML = `
+        <div style="text-align:center;padding:38px 16px;color:var(--text-muted);font-size:.82rem;line-height:1.5">
+          Your Requests box is clean. Incoming message requests from new users, @username squad invites, and squad join requests appear here.
+        </div>
+      `;
+      return;
+    }
+
+    listEl.innerHTML = incomingRequests.map(req => {
+      if (req.reqKind === 'dm_request') {
+        const dm = req.dm;
+        const otherUid = (dm.participants || []).find(u => u !== currentUid) || currentUid;
+        const meta = (dm.participantMeta && dm.participantMeta[otherUid]) || {};
+        return `
+          <div class="request-card">
+            <span class="req-type-pill">Message Request</span>
+            <div class="req-head">
+              <div class="row-avatar">${meta.avatar ? `<img src="${escapeHtml(meta.avatar)}" alt="">` : escapeHtml((meta.nickname || 'W').charAt(0).toUpperCase())}</div>
+              <div style="flex:1;min-width:0">
+                <div style="font-size:.86rem;font-weight:800">${escapeHtml(meta.nickname || 'Warrior')} <span style="color:var(--accent-cyan);font-size:.74rem">@${escapeHtml(meta.username || '')}</span></div>
+                <div style="font-size:.75rem;color:var(--text-muted);margin-top:2px">${escapeHtml(dm.lastMessageText || 'Sent you a message')}</div>
+              </div>
+            </div>
+            <div class="req-actions">
+              <button type="button" class="req-btn" data-act="preview-dm" data-id="${escapeHtml(dm.id)}">View</button>
+              <button type="button" class="req-btn accept" data-act="accept-dm" data-id="${escapeHtml(dm.id)}">Accept</button>
+              <button type="button" class="req-btn decline" data-act="decline-dm" data-id="${escapeHtml(dm.id)}">Decline</button>
+            </div>
+          </div>
+        `;
+      }
+
+      if (req.reqKind === 'squad_invite') {
+        return `
+          <div class="request-card">
+            <span class="req-type-pill" style="background:rgba(0,240,255,.14);color:var(--accent-cyan);border-color:rgba(0,240,255,.35)">Squad Invite</span>
+            <div class="req-head">
+              <div class="row-avatar squad-shape">${req.squadAvatar ? `<img src="${escapeHtml(req.squadAvatar)}" alt="">` : escapeHtml((req.squadName || 'S').charAt(0).toUpperCase())}</div>
+              <div style="flex:1;min-width:0">
+                <div style="font-size:.86rem;font-weight:800">${escapeHtml(req.squadName || 'Squad')}</div>
+                <div style="font-size:.74rem;color:var(--text-muted)">Invited by <b>@${escapeHtml(req.fromUsername || 'leader')}</b></div>
+              </div>
+            </div>
+            <div class="req-actions">
+              <button type="button" class="req-btn accept" data-act="accept-invite" data-id="${escapeHtml(req.id)}" data-sid="${escapeHtml(req.squadId)}">Accept &amp; Join</button>
+              <button type="button" class="req-btn decline" data-act="decline-req" data-id="${escapeHtml(req.id)}">Decline</button>
+            </div>
+          </div>
+        `;
+      }
+
+      // squad_join request (for Squad Leader)
+      return `
+        <div class="request-card">
+          <span class="req-type-pill" style="background:rgba(16,185,129,.15);color:#34d399;border-color:rgba(16,185,129,.35)">Squad Join Request</span>
+          <div class="req-head">
+            <div class="row-avatar">${req.fromAvatar ? `<img src="${escapeHtml(req.fromAvatar)}" alt="">` : escapeHtml((req.fromNickname || 'W').charAt(0).toUpperCase())}</div>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:.86rem;font-weight:800">${escapeHtml(req.fromNickname || 'Warrior')} <span style="color:var(--accent-cyan);font-size:.73rem">@${escapeHtml(req.fromUsername || '')}</span></div>
+              <div style="font-size:.74rem;color:var(--text-muted)">Wants to join <b>${escapeHtml(req.squadName || 'your squad')}</b> · ${Number(req.fromStreak || 0)}d streak</div>
+            </div>
+          </div>
+          <div class="req-actions">
+            <button type="button" class="req-btn accept" data-act="approve-join" data-id="${escapeHtml(req.id)}" data-sid="${escapeHtml(req.squadId)}" data-uid="${escapeHtml(req.fromUid)}">Approve</button>
+            <button type="button" class="req-btn decline" data-act="decline-req" data-id="${escapeHtml(req.id)}">Decline</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    listEl.querySelectorAll('[data-act]').forEach(btn => {
+      btn.addEventListener('click', () => handleRequestAction(btn.dataset.act, btn.dataset));
+    });
+  }
+}
+
+/* ============================================================================
+ * REQUESTS & INVITES ACTIONS
+ * ============================================================================ */
+async function handleRequestAction(act, data) {
+  try {
+    if (act === 'preview-dm') {
+      const dm = myDMs.find(x => x.id === data.id);
+      if (dm) openConversation({ type: 'dm', id: dm.id, data: dm });
+      return;
+    }
+    if (act === 'accept-dm') {
+      await updateDoc(doc(db, "dms", data.id), { status: 'accepted', updatedAt: serverTimestamp() });
+      showToast("Message request accepted!");
+      await refreshAllLists();
+      const dm = myDMs.find(x => x.id === data.id);
+      if (dm) openConversation({ type: 'dm', id: dm.id, data: dm });
+      return;
+    }
+    if (act === 'decline-dm') {
+      await deleteDoc(doc(db, "dms", data.id));
+      showToast("Message request declined.");
+      if (activeRoom?.type === 'dm' && activeRoom?.id === data.id) closeActiveRoom();
+      await refreshAllLists();
+      return;
+    }
+    if (act === 'decline-req') {
+      await updateDoc(doc(db, "squadRequests", data.id), { status: 'declined' });
+      showToast("Request declined.");
+      await refreshAllLists();
+      return;
+    }
+    if (act === 'accept-invite' || act === 'approve-join') {
+      const sqRef = doc(db, "squads", data.sid);
+      const sqSnap = await getDoc(sqRef);
+      if (!sqSnap.exists()) {
+        showToast("Squad no longer exists.");
+        return;
+      }
+      const sq = sqSnap.data();
+      const members = Array.isArray(sq.memberUids) ? sq.memberUids : [];
+      if (members.length >= MAX_SQUAD_MEMBERS) {
+        showToast(`Squad is full (${MAX_SQUAD_MEMBERS}/${MAX_SQUAD_MEMBERS} members max).`);
+        return;
+      }
+      const targetUid = act === 'accept-invite' ? currentUid : data.uid;
+      if (!members.includes(targetUid)) {
+        await updateDoc(sqRef, {
+          memberUids: arrayUnion(targetUid),
+          memberCount: members.length + 1
+        });
+      }
+      await updateDoc(doc(db, "squadRequests", data.id), { status: 'accepted' });
+      if (act === 'accept-invite') {
+        await updateDoc(doc(db, "users", currentUid), { squadId: data.sid }).catch(() => {});
+      }
+      showToast(act === 'accept-invite' ? `Joined ${sq.name}!` : "Member approved and added to Squad!");
+      await refreshAllLists();
+    }
+  } catch (err) {
+    console.error("Request action error:", err);
+    showToast("Action failed: " + (err.code || err.message));
+  }
+}
+
+async function handleJoinOrRequestSquad(squadId) {
+  try {
+    const sqRef = doc(db, "squads", squadId);
+    const sqSnap = await getDoc(sqRef);
+    if (!sqSnap.exists()) return;
+    const sq = sqSnap.data();
+    const members = Array.isArray(sq.memberUids) ? sq.memberUids : [];
+    if (members.length >= MAX_SQUAD_MEMBERS) {
+      showToast("This squad is already at the 15-member limit.");
+      return;
+    }
+
+    if (sq.privacy === 'open') {
+      await updateDoc(sqRef, {
+        memberUids: arrayUnion(currentUid),
+        memberCount: members.length + 1
+      });
+      await updateDoc(doc(db, "users", currentUid), { squadId }).catch(() => {});
+      showToast(`Joined ${sq.name}!`);
+      activePrimaryTab = 'chats';
+      updatePrimaryTabUI();
+      await refreshAllLists();
+      const joined = mySquads.find(s => s.id === squadId);
+      if (joined) openConversation({ type: 'squad', id: squadId, data: joined });
+    } else {
+      const reqId = `join_${squadId}_${currentUid}`;
+      await setDoc(doc(db, "squadRequests", reqId), {
+        type: 'join_request',
+        status: 'pending',
+        squadId,
+        squadName: sq.name || 'Squad',
+        squadAvatar: sq.avatar || '',
+        leaderUid: sq.leaderUid,
+        fromUid: currentUid,
+        fromNickname: myProfile.nickname || 'Warrior',
+        fromUsername: myProfile.username || '',
+        fromAvatar: myProfile.avatar || '',
+        fromStreak: effectiveStreak(myProfile),
+        targetUid: sq.leaderUid,
+        createdAt: serverTimestamp()
+      });
+      showToast(`Join request sent to ${sq.name}'s Leader!`);
+    }
+  } catch (err) {
+    console.error("Join/request squad error:", err);
+    showToast("Couldn't process request: " + (err.code || err.message));
+  }
+}
+
+/* ============================================================================
+ * OPEN CONVERSATION & REAL-TIME MESSAGE STREAM
+ * ============================================================================ */
+function closeActiveRoom() {
+  if (unsubscribeMessages) { unsubscribeMessages(); unsubscribeMessages = null; }
+  activeRoom = null;
+  document.body.classList.remove('mobile-chat-open');
+  $('chat-empty-state').style.display = 'flex';
+  $('chat-active-view').style.display = 'none';
+  renderSidebar();
+}
+
+$('btn-mobile-back').addEventListener('click', closeActiveRoom);
+
+function getMessagesCollectionRef(room) {
+  if (room.type === 'global') return collection(db, "globalRooms", "main", "messages");
+  if (room.type === 'squad') return collection(db, "squads", room.id, "messages");
+  return collection(db, "dms", room.id, "messages");
+}
+
+function openConversation(room) {
+  if (unsubscribeMessages) { unsubscribeMessages(); unsubscribeMessages = null; }
+  activeRoom = room;
+  replyingTo = null;
+  stagedAttachment = null;
+  updateStagingBarUI();
+  document.body.classList.add('mobile-chat-open');
+  $('chat-empty-state').style.display = 'none';
+  $('chat-active-view').style.display = 'flex';
+  renderSidebar();
+
+  const avEl = $('active-chat-avatar');
+  const titleEl = $('active-chat-title');
+  const subEl = $('active-chat-sub');
+  const inviteBtn = $('btn-squad-invite-open');
+  const leaveBtn = $('btn-leave-room');
+  const gateBar = $('dm-request-gate-bar');
+
+  avEl.className = 'chat-header-avatar';
+  gateBar.classList.remove('show');
+
+  if (room.type === 'global') {
+    avEl.classList.add('squad-shape');
+    avEl.innerHTML = `<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>`;
+    titleEl.textContent = "Global Arena";
+    subEl.textContent = "Worldwide Group Chat · Leave anytime (cannot rejoin once left)";
+    inviteBtn.style.display = 'none';
+    leaveBtn.style.display = 'inline-flex';
+    $('leave-room-label').textContent = "Leave Forever";
+  } else if (room.type === 'squad') {
+    const sq = room.data;
+    const count = Array.isArray(sq.memberUids) ? sq.memberUids.length : 1;
+    avEl.classList.add('squad-shape');
+    avEl.innerHTML = sq.avatar
+      ? `<img src="${escapeHtml(sq.avatar)}" alt="">`
+      : `<span>${escapeHtml((sq.name || 'S').charAt(0).toUpperCase())}</span>`;
+    titleEl.textContent = sq.name || "Squad";
+    subEl.textContent = `${count} / ${MAX_SQUAD_MEMBERS} Members · ${sq.motto || 'Accountability Squad'}`;
+    inviteBtn.style.display = 'inline-flex';
+    leaveBtn.style.display = 'inline-flex';
+    $('leave-room-label').textContent = "Leave Squad";
+  } else {
+    const dm = room.data;
+    const otherUid = (dm.participants || []).find(u => u !== currentUid) || currentUid;
+    const meta = (dm.participantMeta && dm.participantMeta[otherUid]) || {};
+    avEl.innerHTML = meta.avatar
+      ? `<img src="${escapeHtml(meta.avatar)}" alt="">`
+      : `<span>${escapeHtml((meta.nickname || 'W').charAt(0).toUpperCase())}</span>`;
+    titleEl.textContent = meta.nickname || "Warrior";
+    subEl.textContent = meta.username ? `@${meta.username} · Direct Message` : "Direct Message";
+    inviteBtn.style.display = 'none';
+    leaveBtn.style.display = 'none';
+
+    if (dm.status === 'requested' && dm.initiatorUid !== currentUid) {
+      gateBar.classList.add('show');
+      $('btn-gate-accept-dm').onclick = () => handleRequestAction('accept-dm', { id: dm.id });
+      $('btn-gate-decline-dm').onclick = () => handleRequestAction('decline-dm', { id: dm.id });
+    }
+  }
+
+  const msgsRef = getMessagesCollectionRef(room);
+  const q = query(msgsRef, orderBy("createdAt", "asc"), limit(80));
+
+  unsubscribeMessages = onSnapshot(q, snap => {
+    currentMessages = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    renderMessagesStream();
+    markMessagesAsSeen(room, currentMessages);
+  }, err => {
+    console.warn("Stream listener error:", err);
+  });
+}
+
+/* ============================================================================
+ * AUTOMATIC READ RECEIPTS ("SEEN BY" IN GROUPS & "SEEN" IN DMS)
+ * ============================================================================ */
+async function markMessagesAsSeen(room, messages) {
+  if (!currentUid || !messages.length) return;
+  // Don't auto-mark seen if viewing an unaccepted incoming DM request
+  if (room.type === 'dm' && room.data?.status === 'requested' && room.data?.initiatorUid !== currentUid) {
+    return;
+  }
+
+  const msgsRef = getMessagesCollectionRef(room);
+  // Check the latest 12 messages from other senders that don't yet have currentUid in seenBy
+  const unseen = messages.slice(-12).filter(m =>
+    m.senderUid && m.senderUid !== currentUid && (!m.seenBy || !m.seenBy[currentUid])
+  );
+
+  for (const m of unseen) {
+    try {
+      await updateDoc(doc(msgsRef, m.id), {
+        [`seenBy.${currentUid}`]: {
+          nickname: myProfile?.nickname || "Warrior",
+          username: myProfile?.username || "",
+          avatar: (myProfile?.avatar && myProfile.avatar.length < 250000) ? myProfile.avatar : "",
+          at: new Date().toISOString()
+        }
+      });
+    } catch {}
+  }
+}
+
+/* ============================================================================
+ * RENDER MESSAGES STREAM (STRICT SENDER-ONLY GROUP "SEEN BY" + DM "SEEN")
+ * ======================================================================== */
+function renderMessagesStream() {
+  const box = $('messages-stream');
+  if (!currentMessages.length) {
+    box.innerHTML = `
+      <div class="sys-msg-pill" style="margin:auto">
+        No messages yet. Send the first message, photo, or PDF document below.
+      </div>
+    `;
+    return;
+  }
+
+  const isGroup = activeRoom?.type === 'global' || activeRoom?.type === 'squad';
+
+  box.innerHTML = currentMessages.map(m => {
+    if (m.type === 'system') {
+      return `<div class="sys-msg-pill">${escapeHtml(m.text || '')}</div>`;
+    }
+
+    const isOwn = m.senderUid === currentUid;
+    const senderName = m.senderNickname || "Warrior";
+    const senderHandle = m.senderUsername ? `@${m.senderUsername}` : "";
+    const senderStreak = Number(m.senderStreak || 0);
+
+    // Avatar
+    const avHtml = !isOwn ? `
+      <div class="msg-sender-av" data-handle="${escapeHtml(m.senderUsername || '')}" title="View ${escapeHtml(senderName)}">
+        ${m.senderAvatar ? `<img src="${escapeHtml(m.senderAvatar)}" alt="">` : escapeHtml(senderName.charAt(0).toUpperCase())}
+      </div>
+    ` : '';
+
+    // Reply Quote
+    const replyHtml = m.replyTo ? `
+      <div class="msg-reply-quote">
+        <b>${escapeHtml(m.replyTo.senderName || 'Warrior')}</b>
+        <span>${escapeHtml(m.replyTo.text || '')}</span>
+      </div>
+    ` : '';
+
+    // Attachment Rendering (Standard Photo / View Once 1x / View Twice 2x / PDF)
+    let attHtml = '';
+    if (m.attachment && m.attachment.mediaId) {
+      const att = m.attachment;
+      if (att.kind === 'photo') {
+        if (att.viewMode === 'once' || att.viewMode === 'twice') {
+          const maxV = att.viewMode === 'once' ? 1 : 2;
+          const viewsMap = m.viewsBy || {};
+          const myViews = Number(viewsMap[currentUid] || 0);
+          // Total opens by recipients (excluding sender)
+          const recipientViews = Object.entries(viewsMap)
+            .filter(([uid]) => uid !== m.senderUid)
+            .reduce((acc, [, v]) => acc + Number(v || 0), 0);
+
+          const isExpiredForMe = !isOwn && myViews >= maxV;
+          const rem = Math.max(0, maxV - myViews);
+
+          let subStatus = "";
+          if (isOwn) {
+            subStatus = recipientViews > 0
+              ? `Opened (${recipientViews}/${maxV} views used)`
+              : `Sent · ${att.viewMode === 'once' ? 'View Once (1x)' : 'View Twice (2x)'}`;
+          } else if (isExpiredForMe) {
+            subStatus = `Opened · Limit reached (${maxV}/${maxV})`;
+          } else {
+            subStatus = `${rem} of ${maxV} view${rem === 1 ? '' : 's'} remaining · Tap to view`;
+          }
+
+          attHtml = `
+            <div class="att-ephemeral-card ${isExpiredForMe ? 'expired' : ''}"
+                 data-eph-mid="${escapeHtml(att.mediaId)}"
+                 data-msg-id="${escapeHtml(m.id)}"
+                 data-vmode="${escapeHtml(att.viewMode)}"
+                 data-expired="${isExpiredForMe ? '1' : '0'}">
+              <div class="eph-left">
+                <div class="eph-badge-ring">${att.viewMode === 'once' ? '1x' : '2x'}</div>
+                <div class="eph-meta">
+                  <span class="eph-title">${att.viewMode === 'once' ? 'View Once Photo' : 'View Twice Photo'}</span>
+                  <span class="eph-sub">${escapeHtml(subStatus)}</span>
+                </div>
+              </div>
+              <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" fill="none" stroke-width="2.2">
+                ${isExpiredForMe
+                  ? '<rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>'
+                  : '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>'}
+              </svg>
+            </div>
+          `;
+        } else {
+          // Standard Photo
+          const thumbSrc = att.inlineThumb || "";
+          attHtml = `
+            <div class="att-photo-standard" data-std-mid="${escapeHtml(att.mediaId)}" data-thumb="${escapeHtml(thumbSrc)}">
+              ${thumbSrc
+                ? `<img src="${escapeHtml(thumbSrc)}" alt="Photo">`
+                : `<div style="padding:28px;text-align:center;font-size:.78rem;color:var(--accent-cyan)">Tap to load HD Photo</div>`}
+            </div>
+          `;
+        }
+      } else if (att.kind === 'pdf') {
+        const mb = ((att.fileSize || 0) / (1024 * 1024)).toFixed(2);
+        attHtml = `
+          <div class="att-pdf-card">
+            <div class="pdf-icon-box">
+              <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            </div>
+            <div class="pdf-info">
+              <span class="pdf-name">${escapeHtml(att.fileName || 'document.pdf')}</span>
+              <span class="pdf-size">PDF Document · ${mb} MB</span>
+            </div>
+            <button type="button" class="pdf-open-btn" data-pdf-mid="${escapeHtml(att.mediaId)}" data-pdf-name="${escapeHtml(att.fileName || 'document.pdf')}">Open PDF</button>
+          </div>
+        `;
+      }
+    }
+
+    // Reactions Strip
+    const reactionsMap = m.reactions || {};
+    const reactionChips = Object.entries(reactionsMap)
+      .filter(([, uids]) => Array.isArray(uids) && uids.length > 0)
+      .map(([emoji, uids]) => {
+        const mine = uids.includes(currentUid);
+        return `<button type="button" class="reaction-chip ${mine ? 'mine' : ''}" data-react-msg="${escapeHtml(m.id)}" data-emoji="${escapeHtml(emoji)}"><span>${escapeHtml(emoji)}</span><span>${uids.length}</span></button>`;
+      }).join('');
+
+    // Read Receipts Logic:
+    // 1. In Group Chats (Squads & Global Arena): Show "Seen by X" button ONLY TO THE SENDER (isOwn === true)!
+    // 2. In 1-on-1 DMs: Show subtle "Seen" (or "Opened" for ephemeral photo) below the sender's message/attachment.
+    let seenReceiptHtml = '';
+    const seenByObj = m.seenBy || {};
+    const seenEntries = Object.entries(seenByObj).filter(([uid]) => uid !== m.senderUid);
+
+    if (isOwn) {
+      if (isGroup) {
+        // SENDER-ONLY "Seen by..." trigger in group chats!
+        if (seenEntries.length > 0) {
+          seenReceiptHtml = `
+            <button type="button" class="seen-group-btn" data-seen-msg="${escapeHtml(m.id)}" title="Click to see who viewed your message">
+              <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              <span>Seen by ${seenEntries.length}</span>
+            </button>
+          `;
+        } else {
+          seenReceiptHtml = `<span>Sent</span>`;
+        }
+      } else {
+        // 1-on-1 DM: subtle "Seen" or "Opened" below message/attachment
+        const viewsMap = m.viewsBy || {};
+        const openedEph = Object.entries(viewsMap).some(([uid, cnt]) => uid !== m.senderUid && Number(cnt) > 0);
+        if (openedEph) {
+          seenReceiptHtml = `
+            <span class="seen-dm-label">
+              <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+              <span>Opened</span>
+            </span>
+          `;
+        } else if (seenEntries.length > 0) {
+          seenReceiptHtml = `
+            <span class="seen-dm-label">
+              <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+              <span>Seen</span>
+            </span>
+          `;
+        } else {
+          seenReceiptHtml = `<span>Sent</span>`;
+        }
+      }
+    }
+
+    // Reaction popover choices
+    const popoverHtml = `
+      <div class="reaction-popover" id="react-pop-${escapeHtml(m.id)}">
+        ${QUICK_REACTIONS.map(em => `<button type="button" class="react-emoji-choice" data-react-msg="${escapeHtml(m.id)}" data-emoji="${em}">${em}</button>`).join('')}
+      </div>
+    `;
+
+    return `
+      <div class="msg-row ${isOwn ? 'own' : 'other'}" data-msgid="${escapeHtml(m.id)}">
+        ${avHtml}
+        <div class="msg-col">
+          ${!isOwn ? `
+            <div class="msg-sender-line">
+              <span>${escapeHtml(senderName)}</span>
+              ${senderHandle ? `<span style="opacity:.7">${escapeHtml(senderHandle)}</span>` : ''}
+              <span class="sender-streak-chip">${senderStreak}d</span>
+            </div>
+          ` : ''}
+
+          <div class="msg-bubble-wrap">
+            ${popoverHtml}
+            <div class="msg-bubble">
+              ${replyHtml}
+              ${attHtml}
+              ${m.text ? `<div>${escapeHtml(m.text)}</div>` : ''}
+            </div>
+
+            <div class="msg-quick-bar">
+              <button type="button" class="quick-ico-btn quick-react-trigger" data-pop="react-pop-${escapeHtml(m.id)}" title="React">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+              </button>
+              <button type="button" class="quick-ico-btn quick-reply-trigger" data-msgid="${escapeHtml(m.id)}" data-sender="${escapeHtml(senderName)}" data-text="${escapeHtml(m.text || (m.attachment ? `[${m.attachment.kind.toUpperCase()}]` : ''))}" title="Reply">
+                <svg viewBox="0 0 24 24"><polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 0 0-4-4H4"/></svg>
+              </button>
+            </div>
+          </div>
+
+          ${reactionChips ? `<div class="msg-reactions-strip">${reactionChips}</div>` : ''}
+
+          <div class="msg-foot-row">
+            <span>${formatShortTime(m.createdAt)}</span>
+            ${seenReceiptHtml}
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  box.scrollTop = box.scrollHeight;
+  bindMessageStreamInteractions();
+}
+
+function bindMessageStreamInteractions() {
+  const box = $('messages-stream');
+
+  // Open Reaction Popover
+  box.querySelectorAll('.quick-react-trigger').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      const pop = $(btn.dataset.pop);
+      document.querySelectorAll('.reaction-popover.open').forEach(el => { if (el !== pop) el.classList.remove('open'); });
+      pop?.classList.toggle('open');
+    });
+  });
+
+  // Toggle Emoji Reaction
+  box.querySelectorAll('[data-react-msg]').forEach(btn => {
+    btn.addEventListener('click', async e => {
+      e.stopPropagation();
+      const msgId = btn.dataset.reactMsg;
+      const emoji = btn.dataset.emoji;
+      document.querySelectorAll('.reaction-popover.open').forEach(el => el.classList.remove('open'));
+      await toggleMessageReaction(msgId, emoji);
+    });
+  });
+
+  // Reply to Message
+  box.querySelectorAll('.quick-reply-trigger').forEach(btn => {
+    btn.addEventListener('click', () => {
+      replyingTo = {
+        id: btn.dataset.msgid,
+        senderName: btn.dataset.sender,
+        text: btn.dataset.text
+      };
+      updateStagingBarUI();
+      $('composer-text-input').focus();
+    });
+  });
+
+  // Sender-Only "Seen By" Popup Card in Group Chats
+  box.querySelectorAll('.seen-group-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const msg = currentMessages.find(x => x.id === btn.dataset.seenMsg);
+      if (!msg || msg.senderUid !== currentUid) return; // Strict sender-only guard!
+      openSeenByPopupModal(msg);
+    });
+  });
+
+  // Standard Photo Lightbox
+  box.querySelectorAll('.att-photo-standard').forEach(card => {
+    card.addEventListener('click', () => openMediaViewerModal({
+      kind: 'photo',
+      viewMode: 'standard',
+      mediaId: card.dataset.stdMid,
+      fallbackThumb: card.dataset.thumb
+    }));
+  });
+
+  // View Once (1x) & View Twice (2x) Photo Viewer
+  box.querySelectorAll('.att-ephemeral-card').forEach(card => {
+    card.addEventListener('click', () => {
+      if (card.dataset.expired === '1') {
+        showToast("This photo has reached its view limit and can no longer be opened.");
+        return;
+      }
+      openEphemeralPhotoModal(card.dataset.msgId, card.dataset.ephMid, card.dataset.vmode);
+    });
+  });
+
+  // PDF Document Viewer
+  box.querySelectorAll('.pdf-open-btn').forEach(btn => {
+    btn.addEventListener('click', () => openMediaViewerModal({
+      kind: 'pdf',
+      mediaId: btn.dataset.pdfMid,
+      fileName: btn.dataset.pdfName
+    }));
+  });
+
+  // Click sender avatar to visit their public profile
+  box.querySelectorAll('.msg-sender-av').forEach(av => {
+    av.addEventListener('click', () => {
+      const h = av.dataset.handle;
+      if (h) location.href = `/${encodeURIComponent(h)}`;
+    });
+  });
+}
+
+/* ============================================================================
+ * SENDER-ONLY "SEEN BY" POPUP CARD MODAL
+ * ============================================================================ */
+function openSeenByPopupModal(msg) {
+  if (!msg || msg.senderUid !== currentUid) return;
+  const seenByObj = msg.seenBy || {};
+  const entries = Object.entries(seenByObj).filter(([uid]) => uid !== msg.senderUid);
+  const listEl = $('seen-by-list');
+
+  if (!entries.length) {
+    listEl.innerHTML = `<div style="padding:16px;text-align:center;color:var(--text-muted);font-size:.82rem">No group members have viewed this message yet.</div>`;
+  } else {
+    listEl.innerHTML = entries.map(([, info]) => {
+      const nick = info.nickname || "Warrior";
+      const uname = info.username ? `@${info.username}` : "";
+      const timeStr = formatShortTime(info.at);
+      return `
+        <div class="seen-user-row">
+          <div class="seen-user-left">
+            <div class="row-avatar" style="width:36px;height:36px;font-size:.82rem">
+              ${info.avatar ? `<img src="${escapeHtml(info.avatar)}" alt="">` : escapeHtml(nick.charAt(0).toUpperCase())}
+            </div>
+            <div>
+              <div style="font-size:.84rem;font-weight:800">${escapeHtml(nick)}</div>
+              <div style="font-size:.71rem;color:var(--text-muted)">${escapeHtml(uname)}</div>
+            </div>
+          </div>
+          <span class="seen-time-badge">Seen ${escapeHtml(timeStr)}</span>
+        </div>
+      `;
+    }).join('');
+  }
+  $('seen-by-modal').classList.add('open');
+}
+$('btn-close-seen-modal').addEventListener('click', () => $('seen-by-modal').classList.remove('open'));
+
+/* ============================================================================
+ * SECURE VIEW-ONCE (1x), VIEW-TWICE (2x), STANDARD PHOTO & PDF VIEWER MODAL
+ * ============================================================================ */
+async function openEphemeralPhotoModal(msgId, mediaId, viewMode) {
+  const msg = currentMessages.find(x => x.id === msgId);
+  if (!msg || !activeRoom) return;
+
+  const isOwn = msg.senderUid === currentUid;
+  const maxViews = viewMode === 'once' ? 1 : 2;
+  const currentViews = Number((msg.viewsBy && msg.viewsBy[currentUid]) || 0);
+
+  if (!isOwn && currentViews >= maxViews) {
+    showToast(`View limit reached (${maxViews}/${maxViews}).`);
+    return;
+  }
+
+  const stage = $('viewer-stage-box');
+  $('viewer-download-btn').style.display = 'none';
+  $('viewer-badge-label').textContent = isOwn
+    ? `Sender Preview · ${viewMode === 'once' ? 'View Once (1x)' : 'View Twice (2x)'}`
+    : `${viewMode === 'once' ? 'View Once' : 'View Twice'} · View ${currentViews + 1} of ${maxViews}`;
+  stage.innerHTML = `<div style="padding:40px;color:var(--text-muted);font-weight:700">Decrypting ephemeral photo...</div>`;
+  $('media-viewer-modal').classList.add('open');
+
+  try {
+    // Increment view counter for recipient BEFORE rendering
+    if (!isOwn) {
+      const msgsRef = getMessagesCollectionRef(activeRoom);
+      await updateDoc(doc(msgsRef, msgId), {
+        [`viewsBy.${currentUid}`]: currentViews + 1
+      });
+    }
+
+    const { meta, fullBase64 } = await downloadFromMediaVault(mediaId);
+    const dataUrl = `data:${meta.mimeType || 'image/webp'};base64,${fullBase64}`;
+    stage.innerHTML = `
+      <div style="position:relative;user-select:none;-webkit-user-select:none;max-width:100%" oncontextmenu="return false">
+        <img src="${dataUrl}" alt="Ephemeral Photo" draggable="false" style="max-width:100%;max-height:70dvh;border-radius:18px;border:1.5px solid var(--accent-cyan);display:block">
+      </div>
+    `;
+  } catch (err) {
+    stage.innerHTML = `<div style="padding:40px;color:#f87171;font-weight:700">${escapeHtml(err.message || 'Could not load photo.')}</div>`;
+  }
+}
+
+async function openMediaViewerModal({ kind, mediaId, fileName, fallbackThumb }) {
+  const stage = $('viewer-stage-box');
+  const dlBtn = $('viewer-download-btn');
+  dlBtn.style.display = 'none';
+  $('viewer-badge-label').textContent = kind === 'pdf' ? (fileName || 'PDF Document') : 'HD Photo Viewer';
+  stage.innerHTML = `<div style="padding:40px;color:var(--text-muted);font-weight:700" id="viewer-load-txt">Loading from Media Vault... 0%</div>`;
+  $('media-viewer-modal').classList.add('open');
+
+  try {
+    const { meta, fullBase64 } = await downloadFromMediaVault(mediaId, pct => {
+      const el = $('viewer-load-txt');
+      if (el) el.textContent = `Loading from Media Vault... ${pct}%`;
+    });
+
+    if (kind === 'pdf') {
+      const byteChars = atob(fullBase64);
+      const bytes = new Uint8Array(byteChars.length);
+      for (let i = 0; i < byteChars.length; i++) bytes[i] = byteChars.charCodeAt(i);
+      const blob = new Blob([bytes], { type: 'application/pdf' });
+      const blobUrl = URL.createObjectURL(blob);
+
+      dlBtn.href = blobUrl;
+      dlBtn.download = meta.fileName || fileName || 'document.pdf';
+      dlBtn.style.display = 'inline-flex';
+
+      stage.innerHTML = `
+        <iframe src="${blobUrl}" style="width:100%;height:70dvh;border:1px solid var(--glass-border);border-radius:16px;background:#fff" title="PDF Viewer"></iframe>
+      `;
+    } else {
+      const dataUrl = `data:${meta.mimeType || 'image/webp'};base64,${fullBase64}`;
+      dlBtn.href = dataUrl;
+      dlBtn.download = meta.fileName || 'photo.webp';
+      dlBtn.style.display = 'inline-flex';
+      stage.innerHTML = `
+        <img src="${dataUrl}" alt="HD Photo" style="max-width:100%;max-height:72dvh;border-radius:18px;border:1px solid var(--glass-border);display:block">
+      `;
+    }
+  } catch (err) {
+    if (fallbackThumb) {
+      stage.innerHTML = `<img src="${escapeHtml(fallbackThumb)}" alt="Photo" style="max-width:100%;max-height:70dvh;border-radius:18px">`;
+    } else {
+      stage.innerHTML = `<div style="padding:40px;color:#f87171;font-weight:700">${escapeHtml(err.message || 'Failed to load media.')}</div>`;
+    }
+  }
+}
+$('btn-close-viewer-modal').addEventListener('click', () => {
+  $('media-viewer-modal').classList.remove('open');
+  $('viewer-stage-box').innerHTML = '';
+});
+
+/* ============================================================================
+ * SEND MESSAGE & TOGGLE REACTION
+ * ============================================================================ */
+$('chat-composer-form').addEventListener('submit', async e => {
+  e.preventDefault();
+  if (!activeRoom || !currentUid) return;
+
+  const text = $('composer-text-input').value.trim();
+  if (!text && !stagedAttachment) return;
+
+  const sendBtn = $('btn-send-msg');
+  sendBtn.disabled = true;
+
+  try {
+    let attachmentPayload = null;
+    if (stagedAttachment) {
+      const vaultInfo = await uploadToMediaVault(stagedAttachment);
+      attachmentPayload = {
+        ...vaultInfo,
+        inlineThumb: stagedAttachment.inlineThumb || ""
+      };
+    }
+
+    const msgsRef = getMessagesCollectionRef(activeRoom);
+    const msgDoc = {
+      type: 'user',
+      senderUid: currentUid,
+      senderNickname: myProfile?.nickname || "Warrior",
+      senderUsername: myProfile?.username || "",
+      senderAvatar: (myProfile?.avatar && myProfile.avatar.length < 250000) ? myProfile.avatar : "",
+      senderStreak: effectiveStreak(myProfile),
+      text,
+      replyTo: replyingTo || null,
+      attachment: attachmentPayload,
+      reactions: {},
+      seenBy: {
+        [currentUid]: {
+          nickname: myProfile?.nickname || "Warrior",
+          username: myProfile?.username || "",
+          at: new Date().toISOString()
+        }
+      },
+      viewsBy: {},
+      createdAt: serverTimestamp()
+    };
+
+    await addDoc(msgsRef, msgDoc);
+
+    const summaryText = text || (attachmentPayload
+      ? (attachmentPayload.kind === 'pdf' ? `[PDF] ${attachmentPayload.fileName}` : `[Photo · ${attachmentPayload.viewMode}]`)
+      : "Message");
+
+    if (activeRoom.type === 'squad') {
+      await updateDoc(doc(db, "squads", activeRoom.id), {
+        lastMessageText: `${myProfile?.nickname || 'Warrior'}: ${summaryText}`.slice(0, 90),
+        lastMessageAt: serverTimestamp()
+      }).catch(() => {});
+    } else if (activeRoom.type === 'dm') {
+      await updateDoc(doc(db, "dms", activeRoom.id), {
+        lastMessageText: summaryText.slice(0, 90),
+        lastMessageAt: serverTimestamp()
+      }).catch(() => {});
+    }
+
+    $('composer-text-input').value = "";
+    replyingTo = null;
+    stagedAttachment = null;
+    $('att-photo-input').value = "";
+    $('att-pdf-input').value = "";
+    updateStagingBarUI();
+  } catch (err) {
+    console.error("Send message error:", err);
+    showToast("Failed to send: " + (err.code || err.message));
+  } finally {
+    sendBtn.disabled = false;
+  }
+});
+
+async function toggleMessageReaction(msgId, emoji) {
+  if (!activeRoom || !currentUid) return;
+  const msg = currentMessages.find(x => x.id === msgId);
+  if (!msg) return;
+  const msgsRef = getMessagesCollectionRef(activeRoom);
+  const currentList = (msg.reactions && Array.isArray(msg.reactions[emoji])) ? msg.reactions[emoji] : [];
+  const hasMine = currentList.includes(currentUid);
+
+  try {
+    await updateDoc(doc(msgsRef, msgId), {
+      [`reactions.${emoji}`]: hasMine ? arrayRemove(currentUid) : arrayUnion(currentUid)
+    });
+  } catch (err) {
+    console.warn("Reaction update failed:", err);
+  }
+}
+
+/* ============================================================================
+ * CREATE SQUAD (15-MEMBER CAP, 0+ DAYS STREAK, 1080x1080 AVATAR)
+ * ============================================================================ */
+$('btn-open-create-squad').addEventListener('click', () => {
+  $('inp-squad-name').value = "";
+  $('inp-squad-motto').value = "";
+  drawSquadMonogram("S");
+  $('squad-modal').classList.add('open');
+});
+$('btn-close-squad-modal').addEventListener('click', () => $('squad-modal').classList.remove('open'));
+
+$('btn-submit-squad').addEventListener('click', async () => {
+  const name = $('inp-squad-name').value.trim().slice(0, 28);
+  const motto = $('inp-squad-motto').value.trim().slice(0, 160);
+  const privacy = $('inp-squad-privacy').value;
+
+  if (!name) {
+    showToast("Please enter a Squad name.");
+    return;
+  }
+
+  const btn = $('btn-submit-squad');
+  btn.disabled = true;
+  btn.textContent = "Forging Squad...";
+
+  try {
+    if (sqHasCustom) renderSquadCropCanvas();
+    const sqRef = await addDoc(collection(db, "squads"), {
+      name,
+      motto: motto || "Daily discipline. Zero excuses.",
+      privacy: privacy || "approval",
+      avatar: stagedSquadAvatarUrl || "",
+      leaderUid: currentUid,
+      leaderNickname: myProfile?.nickname || "Warrior",
+      leaderUsername: myProfile?.username || "",
+      memberUids: [currentUid],
+      memberCount: 1,
+      maxMembers: MAX_SQUAD_MEMBERS,
+      lastMessageText: "Squad forged.",
+      lastMessageAt: serverTimestamp(),
+      createdAt: serverTimestamp()
+    });
+
+    await updateDoc(doc(db, "users", currentUid), { squadId: sqRef.id }).catch(() => {});
+
+    $('squad-modal').classList.remove('open');
+    showToast(`Squad "${name}" created!`);
+    activePrimaryTab = 'chats';
+    updatePrimaryTabUI();
+    await refreshAllLists();
+    const created = mySquads.find(s => s.id === sqRef.id);
+    if (created) openConversation({ type: 'squad', id: sqRef.id, data: created });
+  } catch (err) {
+    console.error("Create squad error:", err);
+    showToast("Failed to create squad: " + (err.code || err.message));
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "Forge Squad (Max 15 Members)";
+  }
+});
+
+/* ============================================================================
+ * START DM OR INVITE WARRIOR VIA @USERNAME (INSTAGRAM-STYLE REQUESTS)
+ * ============================================================================ */
+let lookupMode = "dm"; // 'dm' | 'invite'
+
+function openUserLookupModal(mode = 'dm', prefillUsername = '') {
+  lookupMode = mode;
+  $('inp-target-username').value = (prefillUsername || '').replace(/^@/, '');
+
+  const sqBlock = $('lookup-squad-picker-block');
+  if (mode === 'invite') {
+    const ledSquads = mySquads.filter(s => s.leaderUid === currentUid || (Array.isArray(s.memberUids) && s.memberUids.includes(currentUid)));
+    if (!ledSquads.length) {
+      showToast("Create or join a Squad first before inviting warriors.");
+      return;
+    }
+    $('lookup-modal-title').textContent = "Invite Warrior to Squad";
+    $('lookup-modal-desc').textContent = "Enter the warrior's @username. The invite will appear in their Requests tab.";
+    sqBlock.style.display = 'flex';
+    $('inp-invite-squad-select').innerHTML = ledSquads.map(s => `<option value="${escapeHtml(s.id)}">${escapeHtml(s.name)} (${(s.memberUids || []).length}/${MAX_SQUAD_MEMBERS})</option>`).join('');
+    if (activeRoom?.type === 'squad') {
+      $('inp-invite-squad-select').value = activeRoom.id;
+    }
+  } else {
+    $('lookup-modal-title').textContent = "Message via @Username";
+    $('lookup-modal-desc').textContent = "Enter a warrior's @username. Messaging someone new places the thread in their Requests inbox until accepted.";
+    sqBlock.style.display = 'none';
+  }
+
+  $('user-lookup-modal').classList.add('open');
+}
+
+$('btn-open-new-dm').addEventListener('click', () => openUserLookupModal('dm'));
+$('btn-squad-invite-open').addEventListener('click', () => openUserLookupModal('invite'));
+$('btn-close-lookup-modal').addEventListener('click', () => $('user-lookup-modal').classList.remove('open'));
+
+$('btn-confirm-lookup').addEventListener('click', async () => {
+  const uname = $('inp-target-username').value.trim().toLowerCase().replace(/^@/, '');
+  if (!uname) {
+    showToast("Please enter a valid @username.");
+    return;
+  }
+  if (lookupMode === 'dm') {
+    $('user-lookup-modal').classList.remove('open');
+    await startOrOpenDMByUsername(uname);
+  } else {
+    const squadId = $('inp-invite-squad-select').value;
+    await sendSquadInviteByUsername(uname, squadId);
+  }
+});
+
+async function resolveUserByUsername(uname) {
+  const clean = uname.trim().toLowerCase().replace(/^@/, '');
+  let targetUid = null;
+  const uSnap = await getDoc(doc(db, "usernames", clean));
+  if (uSnap.exists()) {
+    targetUid = uSnap.data().uid;
+  } else {
+    const qSnap = await getDocs(query(collection(db, "publicProfiles"), where("username", "==", clean), limit(1)));
+    if (!qSnap.empty) targetUid = qSnap.docs[0].id;
+  }
+  if (!targetUid) return null;
+  const pSnap = await getDoc(doc(db, "publicProfiles", targetUid));
+  return pSnap.exists() ? { uid: targetUid, ...pSnap.data() } : { uid: targetUid, nickname: clean, username: clean };
+}
+
+async function startOrOpenDMByUsername(uname) {
+  try {
+    const target = await resolveUserByUsername(uname);
+    if (!target) {
+      showToast(`Warrior @${uname} not found.`);
+      return;
+    }
+    if (target.uid === currentUid) {
+      showToast("You cannot message yourself.");
+      return;
+    }
+
+    const pair = [currentUid, target.uid].sort();
+    const dmId = `${pair[0]}_${pair[1]}`;
+    const dmRef = doc(db, "dms", dmId);
+    const dmSnap = await getDoc(dmRef);
+
+    let dmData;
+    if (!dmSnap.exists()) {
+      dmData = {
+        participants: pair,
+        initiatorUid: currentUid,
+        status: 'requested', // Goes into recipient's Instagram-style Requests box!
+        participantMeta: {
+          [currentUid]: {
+            nickname: myProfile?.nickname || "Warrior",
+            username: myProfile?.username || "",
+            avatar: (myProfile?.avatar && myProfile.avatar.length < 250000) ? myProfile.avatar : ""
+          },
+          [target.uid]: {
+            nickname: target.nickname || uname,
+            username: target.username || uname,
+            avatar: (target.avatar && target.avatar.length < 250000) ? target.avatar : ""
+          }
+        },
+        lastMessageText: "Message request started",
+        lastMessageAt: serverTimestamp(),
+        createdAt: serverTimestamp()
+      };
+      await setDoc(dmRef, dmData);
+      showToast(`Started conversation with @${target.username || uname} (sent to their Requests).`);
+    } else {
+      dmData = dmSnap.data();
+    }
+
+    activePrimaryTab = 'chats';
+    updatePrimaryTabUI();
+    await refreshAllLists();
+    openConversation({ type: 'dm', id: dmId, data: { id: dmId, ...dmData } });
+  } catch (err) {
+    console.error("Start DM error:", err);
+    showToast("Couldn't start DM: " + (err.code || err.message));
+  }
+}
+
+async function sendSquadInviteByUsername(uname, squadId) {
+  try {
+    const target = await resolveUserByUsername(uname);
+    if (!target) {
+      showToast(`Warrior @${uname} not found.`);
+      return;
+    }
+    const sq = mySquads.find(s => s.id === squadId);
+    if (!sq) return;
+    if (Array.isArray(sq.memberUids) && sq.memberUids.includes(target.uid)) {
+      showToast(`@${uname} is already in ${sq.name}.`);
+      return;
+    }
+    if (Array.isArray(sq.memberUids) && sq.memberUids.length >= MAX_SQUAD_MEMBERS) {
+      showToast(`${sq.name} is already full (15/15).`);
+      return;
+    }
+
+    const reqId = `inv_${squadId}_${target.uid}`;
+    await setDoc(doc(db, "squadRequests", reqId), {
+      type: 'invite',
+      status: 'pending',
+      squadId,
+      squadName: sq.name || 'Squad',
+      squadAvatar: (sq.avatar && sq.avatar.length < 250000) ? sq.avatar : '',
+      leaderUid: sq.leaderUid,
+      fromUid: currentUid,
+      fromNickname: myProfile?.nickname || 'Warrior',
+      fromUsername: myProfile?.username || '',
+      targetUid: target.uid,
+      targetUsername: target.username || uname,
+      createdAt: serverTimestamp()
+    });
+
+    $('user-lookup-modal').classList.remove('open');
+    showToast(`Invited @${target.username || uname} to ${sq.name}!`);
+  } catch (err) {
+    console.error("Invite error:", err);
+    showToast("Failed to send invite: " + (err.code || err.message));
+  }
+}
+
+/* ============================================================================
+ * PERMANENT GLOBAL ARENA LEAVE & SQUAD LEAVE / DETAILS MODAL
+ * ============================================================================ */
+$('btn-leave-room').addEventListener('click', () => {
+  if (!activeRoom) return;
+  if (activeRoom.type === 'global') {
+    $('leave-modal-heading').textContent = "Leave Global Arena Forever?";
+    $('leave-modal-desc').textContent = "Warning: If you leave the Global Arena group chat, you can NEVER join it again. This action is permanent.";
+    $('btn-confirm-leave').textContent = "Leave Forever";
+  } else if (activeRoom.type === 'squad') {
+    $('leave-modal-heading').textContent = `Leave ${activeRoom.data?.name || 'Squad'}?`;
+    $('leave-modal-desc').textContent = "You will be removed from this Squad's active roster.";
+    $('btn-confirm-leave').textContent = "Leave Squad";
+  }
+  $('leave-confirm-modal').classList.add('open');
+});
+
+$('btn-cancel-leave').addEventListener('click', () => $('leave-confirm-modal').classList.remove('open'));
+
+$('btn-confirm-leave').addEventListener('click', async () => {
+  if (!activeRoom || !currentUid) return;
+  $('leave-confirm-modal').classList.remove('open');
+
+  try {
+    if (activeRoom.type === 'global') {
+      // Permanent leave: user can never join Global Arena again!
+      await updateDoc(doc(db, "users", currentUid), { leftGlobalArena: true });
+      await setDoc(doc(db, "publicProfiles", currentUid), { leftGlobalArena: true }, { merge: true }).catch(() => {});
+      myProfile.leftGlobalArena = true;
+      showToast("You have permanently left the Global Arena.");
+      closeActiveRoom();
+      await refreshAllLists();
+    } else if (activeRoom.type === 'squad') {
+      const sqId = activeRoom.id;
+      const sqRef = doc(db, "squads", sqId);
+      const sqSnap = await getDoc(sqRef);
+      if (sqSnap.exists()) {
+        const members = (sqSnap.data().memberUids || []).filter(u => u !== currentUid);
+        await updateDoc(sqRef, {
+          memberUids: arrayRemove(currentUid),
+          memberCount: members.length
+        });
+      }
+      await updateDoc(doc(db, "users", currentUid), { squadId: "" }).catch(() => {});
+      showToast("You left the Squad.");
+      closeActiveRoom();
+      await refreshAllLists();
+    }
+  } catch (err) {
+    console.error("Leave error:", err);
+    showToast("Failed to leave: " + (err.code || err.message));
+  }
+});
+
+// Group / Chat Details Modal + 1080x1080 Avatar Inspection
+$('btn-chat-info-open').addEventListener('click', openRoomDetailsModal);
+$('active-chat-avatar').addEventListener('click', openRoomDetailsModal);
+$('btn-close-info-modal').addEventListener('click', () => $('room-info-modal').classList.remove('open'));
+
+async function openRoomDetailsModal() {
+  if (!activeRoom) return;
+  const body = $('info-modal-body');
+  $('room-info-modal').classList.add('open');
+
+  if (activeRoom.type === 'global') {
+    $('info-modal-title').textContent = "Global Arena";
+    body.innerHTML = `
+      <p style="font-size:.86rem;color:var(--text-muted);line-height:1.5">
+        Global Arena is the worldwide accountability group chat. Anyone can leave it at any time, and once left, you can never rejoin.
+      </p>
+    `;
+    return;
+  }
+
+  if (activeRoom.type === 'dm') {
+    const dm = activeRoom.data;
+    const otherUid = (dm.participants || []).find(u => u !== currentUid) || currentUid;
+    const meta = (dm.participantMeta && dm.participantMeta[otherUid]) || {};
+    $('info-modal-title').textContent = meta.nickname || "Warrior";
+    body.innerHTML = `
+      <div style="display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center">
+        <div class="row-avatar" style="width:110px;height:110px;font-size:2rem;border:2px solid var(--accent-cyan)">
+          ${meta.avatar ? `<img src="${escapeHtml(meta.avatar)}" alt="">` : escapeHtml((meta.nickname || 'W').charAt(0).toUpperCase())}
+        </div>
+        <div>
+          <div style="font-size:1.15rem;font-weight:800">${escapeHtml(meta.nickname || 'Warrior')}</div>
+          <div style="font-size:.82rem;color:var(--accent-cyan)">@${escapeHtml(meta.username || '')}</div>
+        </div>
+        ${meta.username ? `<a href="/${encodeURIComponent(meta.username)}" class="btn-primary-full" style="text-decoration:none;text-align:center">View Public Profile</a>` : ''}
+      </div>
+    `;
+    return;
+  }
+
+  // Squad Details & 15-Member Roster
+  const sq = activeRoom.data;
+  $('info-modal-title').textContent = `${sq.name || 'Squad'} (${(sq.memberUids || []).length}/${MAX_SQUAD_MEMBERS})`;
+  body.innerHTML = `
+    <div style="display:flex;align-items:center;gap:14px">
+      <div class="row-avatar squad-shape" style="width:84px;height:84px;font-size:1.8rem;border:2px solid var(--accent-cyan)">
+        ${sq.avatar ? `<img src="${escapeHtml(sq.avatar)}" alt="">` : escapeHtml((sq.name || 'S').charAt(0).toUpperCase())}
+      </div>
+      <div>
+        <div style="font-size:1.05rem;font-weight:800">${escapeHtml(sq.name || 'Squad')}</div>
+        <div style="font-size:.78rem;color:var(--text-muted);margin-top:3px">${escapeHtml(sq.motto || '')}</div>
+      </div>
+    </div>
+    <div style="font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);margin-top:6px">Squad Roster (${(sq.memberUids || []).length} / 15)</div>
+    <div class="seen-by-list" id="squad-roster-box"><div style="padding:10px;color:var(--text-muted);font-size:.8rem">Loading members...</div></div>
+  `;
+
+  const rosterBox = $('squad-roster-box');
+  const memberUids = Array.isArray(sq.memberUids) ? sq.memberUids : [];
+  const rows = [];
+  for (const mUid of memberUids) {
+    try {
+      const pSnap = await getDoc(doc(db, "publicProfiles", mUid));
+      const p = pSnap.exists() ? pSnap.data() : { nickname: "Warrior" };
+      const s = effectiveStreak(p);
+      const isLeader = mUid === sq.leaderUid;
+      rows.push(`
+        <div class="seen-user-row">
+          <div class="seen-user-left">
+            <div class="row-avatar" style="width:36px;height:36px;font-size:.82rem">
+              ${p.avatar ? `<img src="${escapeHtml(p.avatar)}" alt="">` : escapeHtml((p.nickname || 'W').charAt(0).toUpperCase())}
+            </div>
+            <div>
+              <div style="font-size:.84rem;font-weight:800">${escapeHtml(p.nickname || 'Warrior')} ${isLeader ? '<span class="row-badge" style="margin-left:4px">Leader</span>' : ''}</div>
+              <div style="font-size:.71rem;color:var(--text-muted)">@${escapeHtml(p.username || 'warrior')}</div>
+            </div>
+          </div>
+          <span class="seen-time-badge">${s}d Clean</span>
+        </div>
+      `);
+    } catch {}
+  }
+  if (rosterBox) rosterBox.innerHTML = rows.join('');
+}
+
+/* ============================================================================
+ * SIDEBAR TABS & SEARCH FILTER BINDINGS
+ * ============================================================================ */
+function updatePrimaryTabUI() {
+  document.querySelectorAll('.pri-tab-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.tab === activePrimaryTab);
+  });
+}
+
+document.querySelectorAll('.pri-tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    activePrimaryTab = btn.dataset.tab;
+    updatePrimaryTabUI();
+    renderSidebar();
+  });
+});
+
+document.querySelectorAll('.sub-pill').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.sub-pill').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    activeSubFilter = btn.dataset.sub;
+    renderSidebar();
+  });
+});
+
+$('sidebar-search').addEventListener('input', e => {
+  searchQuery = e.target.value;
+  renderSidebar();
+});
+
+document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
+  backdrop.addEventListener('click', e => {
+    if (e.target === backdrop) backdrop.classList.remove('open');
+  });
+});
+</script>
+</body>
+</html>
